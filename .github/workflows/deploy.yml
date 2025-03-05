@@ -34,14 +34,16 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/u574044099/public_html/automo-bill
-            # chmod -R 755 .
             chmod -R 775 storage bootstrap/cache
             chmod 644 index.php .htaccess
             find . -type f -exec chmod 644 {} \;
             echo "Deployment Completed"
-    notify:
+
+  notify:
+    name: Send Deployment Notification
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: deploy  # Ensure this runs after 'deploy' completes successfully
+
     steps:
       - name: Send Deployment Notification Email
         uses: dawidd6/action-send-mail@v3
