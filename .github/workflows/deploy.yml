@@ -38,22 +38,3 @@ jobs:
             chmod 644 index.php .htaccess
             find . -type f -exec chmod 644 {} \;
             echo "Deployment Completed"
-
-  notify:
-    name: Send Deployment Notification
-    runs-on: ubuntu-latest
-    needs: deploy  # Run after deployment
-
-    steps:
-      - name: Send Deployment Notification Email
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.office365.com
-          server_port: 587
-          secure: true
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "🚀 Deployment Successful - Automo-Bill"
-          to: "hitesh.wp@gmail.com"
-          from: "hitesh.prajapati@gameium.com"
-          html_body: "<p>The latest code has been deployed successfully to <a href='https://staginghuburl.com/automo-bill/'>Automo-Bill</a> 🎉</p>"
