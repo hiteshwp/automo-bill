@@ -1,0 +1,39 @@
+name: Deploy to Hostinger via SSH
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "."  # Upload all files
+          target: "/home/u574044099/public_html/automo-bill"  # Target directory
+          strip_components: 1  # Avoid extra folder nesting
+
+      - name: Set Correct Permissions
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/u574044099/public_html/automo-bill
+            chmod -R 755 .
+            find . -type f -exec chmod 644 {} \;
+            echo "Deployment Completed"
