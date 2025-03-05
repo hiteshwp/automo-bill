@@ -55,5 +55,5 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: "🚀 Deployment Successful - Automo-Bill"
           to: "hitesh.wp@gmail.com"
-          from: "your-email@outlook.com"
+          from: "hitesh.prajapati@gameium.com"
           html_body: "<p>The latest code has been deployed successfully to <a href='https://staginghuburl.com/automo-bill/'>Automo-Bill</a> 🎉</p>"
