@@ -55,5 +55,5 @@ jobs:
           subject: "🚀 Deployment Successful - Automo-Bill"
           body: "The latest code has been deployed successfully to https://staginghuburl.com/automo-bill/ 🎉"
           to: "hitesh.wp@gmail.com"
-          from: "GitHub Actions <no-reply@staginghuburl.com>"
+          from: "GitHub Actions <wordpress@staginghuburl.com>"
           content_type: text/html
