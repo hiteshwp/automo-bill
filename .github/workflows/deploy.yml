@@ -42,7 +42,7 @@ jobs:
   notify:
     name: Send Deployment Notification
     runs-on: ubuntu-latest
-    needs: deploy  # Ensure this runs after 'deploy' completes successfully
+    needs: deploy  # Run after 'deploy' job completes
 
     steps:
       - name: Send Deployment Notification Email
@@ -55,4 +55,5 @@ jobs:
           subject: "🚀 Deployment Successful - Automo-Bill"
           to: "hitesh.wp@gmail.com"
           from: "wordpress@staginghuburl.com"
+          secure: true
           html_body: "<p>The latest code has been deployed successfully to <a href='https://staginghuburl.com/automo-bill/'>Automo-Bill</a> 🎉</p>"
