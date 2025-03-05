@@ -2,7 +2,7 @@
 <html lang="en" data-layout="horizontal" data-topbar="dark" data-sidebar-size="lg" data-sidebar="light" data-sidebar-image="none" data-preloader="disable">
 <head>
     <meta charset="utf-8" />
-    <title>AutoMobill - Log In</title>
+    <title>{{ config('app.name', 'Laravel') }} - Log In</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="" name="description" />
     <meta content="" name="author" />
