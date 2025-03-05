@@ -21,9 +21,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "."  # Upload all files
-          target: "/home/u574044099/public_html/automo-bill"  # Target directory
-          strip_components: 1  # Avoid extra folder nesting
+          source: "."  
+          target: "/home/u574044099/public_html/automo-bill"  
+          strip_components: 1  
 
       - name: Set Correct Permissions
         uses: appleboy/ssh-action@v0.1.10
@@ -53,7 +53,6 @@ jobs:
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: "🚀 Deployment Successful - Automo-Bill"
-          body: "The latest code has been deployed successfully to https://staginghuburl.com/automo-bill/ 🎉"
           to: "hitesh.wp@gmail.com"
-          from: "GitHub Actions <wordpress@staginghuburl.com>"
-          content_type: text/html
+          from: "wordpress@staginghuburl.com"
+          html_body: "<p>The latest code has been deployed successfully to <a href='https://staginghuburl.com/automo-bill/'>Automo-Bill</a> 🎉</p>"
