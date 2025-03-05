@@ -49,10 +49,10 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.hostinger.com
-          server_port: 465
+          server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          secure: true  # Force secure connection
+          secure: false  # Force secure connection
           subject: "🚀 Deployment Successful - Automo-Bill"
           to: "hitesh.wp@gmail.com"
           from: "wordpress@staginghuburl.com"
