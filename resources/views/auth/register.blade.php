@@ -67,9 +67,9 @@
                                             <div class="mb-3">
                                                 <label for="username" class="form-label">Register As a</label>
                                                 <select class="form-select" aria-label="Default select example" name="usaertype" id="usaertype" required>
-                                                    <option selected>Select Type</option>
-                                                    <option value="Garage Owner">Garage Owner</option>
-                                                    <option value="User">User</option>
+                                                <option value="">Select Type</option>
+                                                <option value="Garage Owner" {{ old('usaertype') == 'Garage Owner' ? 'selected' : '' }}>Garage Owner</option>
+                                                <option value="User" {{ old('usaertype') == 'User' ? 'selected' : '' }}>User</option>
                                                 </select>
                                                 @error('usaertype')
                                                     <div class="text-danger" role="alert">{{ $message }}</div>
@@ -88,7 +88,7 @@
                                         <div class="col-12 col-md-4">
                                             <div class="mb-3">
                                                 <label for="username" class="form-label">Mobile Number</label>
-                                                <input class="form-control" id="phone" name="mobilenumber" type="tel" value="" placeholder="Enter your mobile number"  value="{{ old('mobilenumber') }}" required/>
+                                                <input class="form-control" id="phone" name="mobilenumber" type="tel" value="{{ old('mobilenumber', '') }}" placeholder="Enter your mobile number" required/>
                                                 @error('mobilenumber')
                                                     <div class="text-danger" role="alert">{{ $message }}</div>
                                                 @enderror
@@ -106,7 +106,7 @@
                                         <div class="col-12 col-md-4">
                                             <div class="mb-3">
                                                 <label for="website" class="form-label">Website</label>
-                                                <input type="text" class="form-control" id="website" name="website" placeholder="Enter your website" value="{{ old('website') }}" required>
+                                                <input type="text" class="form-control" id="website" name="website" placeholder="Enter your website" value="{{ old('mobilenumber') }}" required>
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4">
@@ -157,7 +157,9 @@
                                                 <select class="form-select" aria-label="Default select example" name="country" id="country" required>
                                                     <option selected>Select Country</option>
                                                     @foreach($countries as $country)
-                                                        <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                                    <option value="{{ $country->id }}" {{ old('country') == $country->id ? 'selected' : '' }}>
+                                                        {{ $country->name }}
+                                                    </option>
                                                     @endforeach
                                                 </select>
                                                 @error('country')
@@ -205,7 +207,7 @@
 
                                     <div class="mt-4">
                                         <button class="btn btn-primary w-100" type="submit">Sign Up</button>
-                                        <input type="hidden" name="phonecode" class="hdnphonecode" value="" id="hdnphonecode"/>
+                                        <input type="hidden" name="phonecode" class="hdnphonecode" value="{{ old('phonecode', '1') }}" id="hdnphonecode"/>
                                     </div>
     
                                     <div class="mt-4 text-left">
@@ -269,8 +271,60 @@
         const input = document.querySelector("#phone");
         const iti = window.intlTelInput(input, {
         initialCountry: "us",
+        separateDialCode: true, // Country code shown separately
+        initialCountry: "auto", // Auto-detect
         });
         window.iti = iti; // useful for testing
+
+        // Retrieve old number from the input field
+        var oldNumber = "+{{ old('phonecode', '+1') }}";
+        var oldMobileNumber = "{{ old('mobilenumber', '') }}"; // Old number
+        if (oldNumber) {
+            iti.setNumber(oldNumber); // Set the number in the input field
+
+            // Extract country code from the number
+            var countryData = iti.getSelectedCountryData();
+            if (!countryData || !countryData.dialCode) {
+                // Try to detect the country from the old number
+                var detectedCountry = iti.getNumberType(oldNumber);
+                if (detectedCountry) {
+                    console.log("Select "+detectedCountry);
+                    iti.setCountry(detectedCountry);
+                }
+            }
+        }
+
+        // ✅ Ensure intlTelInput is ready before accessing country data
+        input.addEventListener("countrychange", function () {
+            setFlagFromOldPhoneCode(); // Update flag when initialized
+        });
+
+        // ✅ Get all country data safely
+        function getCountryByDialCode(dialCode) {
+            var countryData = intlTelInputGlobals.getCountryData();
+            return countryData.find(c => "+" + c.dialCode === dialCode);
+        }
+
+        // ✅ Set country flag based on old phone code
+        function setFlagFromOldPhoneCode() {
+            if (typeof intlTelInputGlobals !== "undefined") {
+                var country = getCountryByDialCode(oldPhoneCode);
+                if (country) {
+                    iti.setCountry(country.iso2); // Set flag
+                }
+            }
+        }
+
+        // 🔄 Wait 500ms before setting the flag to ensure intlTelInput is fully loaded
+        setTimeout(setFlagFromOldPhoneCode, 2000);
+
+        if (oldMobileNumber) {
+            input.value = oldMobileNumber;
+        }
+        else
+        {
+            input.value = "";
+        }
 
         // Get the hidden input field
         const hiddenPhoneCodeInput = document.querySelector("#hdnphonecode");
@@ -328,6 +382,9 @@
         /* phone number country input dropdown js end */
 
     </script>
+
+
+
     <script src="{{ asset('assets/js/plugins.js') }}"></script>
     <!-- password-addon init -->
     <script src="{{ asset('assets/js/pages/password-addon.init.js') }}"></script>
@@ -339,45 +396,107 @@
     <script type="text/javascript">
         $(document).ready(function () {
             //$("#frmregister").parsley();
-        });
 
-        // Fetch states when a country is selected
-        $('#country').on('change', function () {
-            let countryId = $(this).val();
-            $('#state').empty().append('<option value="">Select State</option>');
-            $('#city').empty().append('<option value="">Select City</option>');
+            let selectedCountry = "{{ old('country') }}";
+            let selectedState = "{{ old('state') }}";
+            let selectedCity = "{{ old('city') }}";
 
-            if (countryId) {
+            if (selectedCountry) {
+                $('#country').val(selectedCountry);
+                loadStates(selectedCountry, selectedState);
+            }
+
+            $('#country').on('change', function () {
+                let countryId = $(this).val();
+                $('#state').empty().append('<option value="">Select State</option>');
+                $('#city').empty().append('<option value="">Select City</option>');
+                if (countryId) {
+                    loadStates(countryId, null);
+                }
+            });
+
+            $('#state').on('change', function () {
+                let stateId = $(this).val();
+                $('#city').empty().append('<option value="">Select City</option>');
+                if (stateId) {
+                    loadCities(stateId, null);
+                }
+            });
+
+            function loadStates(countryId, preSelectedState) {
                 $.ajax({
                     url: '/get-states/' + countryId,
                     type: 'GET',
                     success: function (states) {
+                        $('#state').empty().append('<option value="">Select State</option>');
                         $.each(states, function (id, name) {
                             $('#state').append('<option value="' + id + '">' + name + '</option>');
                         });
+
+                        if (preSelectedState) {
+                            $('#state').val(preSelectedState);
+                            loadCities(preSelectedState, selectedCity);
+                        }
                     }
                 });
             }
-        });
 
-        // Fetch cities when a state is selected
-        $('#state').on('change', function () {
-            let stateId = $(this).val();
-            $('#city').empty().append('<option value="">Select City</option>');
-
-            if (stateId) {
+            function loadCities(stateId, preSelectedCity) {
                 $.ajax({
                     url: '/get-cities/' + stateId,
                     type: 'GET',
                     success: function (cities) {
+                        $('#city').empty().append('<option value="">Select City</option>');
                         $.each(cities, function (id, name) {
                             $('#city').append('<option value="' + id + '">' + name + '</option>');
                         });
+
+                        if (preSelectedCity) {
+                            $('#city').val(preSelectedCity);
+                        }
                     }
                 });
             }
-        });
 
+
+            // Fetch states when a country is selected
+            // $('#country').on('change', function () {
+            //     let countryId = $(this).val();
+            //     $('#state').empty().append('<option value="">Select State</option>');
+            //     $('#city').empty().append('<option value="">Select City</option>');
+
+            //     if (countryId) {
+            //         $.ajax({
+            //             url: '/get-states/' + countryId,
+            //             type: 'GET',
+            //             success: function (states) {
+            //                 $.each(states, function (id, name) {
+            //                     $('#state').append('<option value="' + id + '">' + name + '</option>');
+            //                 });
+            //             }
+            //         });
+            //     }
+            // });
+
+            // // Fetch cities when a state is selected
+            // $('#state').on('change', function () {
+            //     let stateId = $(this).val();
+            //     $('#city').empty().append('<option value="">Select City</option>');
+
+            //     if (stateId) {
+            //         $.ajax({
+            //             url: '/get-cities/' + stateId,
+            //             type: 'GET',
+            //             success: function (cities) {
+            //                 $.each(cities, function (id, name) {
+            //                     $('#city').append('<option value="' + id + '">' + name + '</option>');
+            //                 });
+            //             }
+            //         });
+            //     }
+            // });
+
+        });
     </script>
 </body>
 </html>
