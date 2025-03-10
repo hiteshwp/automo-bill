@@ -397,6 +397,8 @@
         $(document).ready(function () {
             //$("#frmregister").parsley();
 
+            let baseUrl = window.location.origin + "/automo-bill/public"; // Dynamically get base URL
+
             let selectedCountry = "{{ old('country') }}";
             let selectedState = "{{ old('state') }}";
             let selectedCity = "{{ old('city') }}";
@@ -425,7 +427,7 @@
 
             function loadStates(countryId, preSelectedState) {
                 $.ajax({
-                    url: '/get-states/' + countryId,
+                    url: baseUrl + '/get-states/' + countryId,
                     type: 'GET',
                     success: function (states) {
                         $('#state').empty().append('<option value="">Select State</option>');
@@ -443,7 +445,7 @@
 
             function loadCities(stateId, preSelectedCity) {
                 $.ajax({
-                    url: '/get-cities/' + stateId,
+                    url: baseUrl + '/get-cities/' + stateId,
                     type: 'GET',
                     success: function (cities) {
                         $('#city').empty().append('<option value="">Select City</option>');
