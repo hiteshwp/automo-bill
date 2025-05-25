@@ -66,12 +66,12 @@
                                         <div class="col-12 col-md-4">
                                             <div class="mb-3">
                                                 <label for="username" class="form-label">Register As a</label>
-                                                <select class="form-select" aria-label="Default select example" name="usaertype" id="usaertype" required>
+                                                <select class="form-select" aria-label="Default select example" name="usertype" id="usertype" required>
                                                 <option value="">Select Type</option>
-                                                <option value="Garage Owner" {{ old('usaertype') == 'Garage Owner' ? 'selected' : '' }}>Garage Owner</option>
-                                                <option value="User" {{ old('usaertype') == 'User' ? 'selected' : '' }}>User</option>
+                                                <option value="Garage Owner" {{ old('usertype') == 'Garage Owner' ? 'selected' : '' }}>Garage Owner</option>
+                                                <option value="User" {{ old('usertype') == 'User' ? 'selected' : '' }}>User</option>
                                                 </select>
-                                                @error('usaertype')
+                                                @error('usertype')
                                                     <div class="text-danger" role="alert">{{ $message }}</div>
                                                 @enderror
                                             </div>

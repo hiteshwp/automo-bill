@@ -44,7 +44,7 @@ class RegisteredUserController extends Controller
             'city' => 'required|exists:tbl_cities,id',
             'zip' => 'required|string|max:10',
             'website' => 'nullable|url|max:255',
-            'usaertype' => 'required|in:Super Admin,Garage Owner,User',
+            'usertype' => 'required|in:Super Admin,Garage Owner,User',
         ]);
 
         $user = User::create([
@@ -62,6 +62,7 @@ class RegisteredUserController extends Controller
             'zip' => $request->zip,
             'website' => $request->website,
             'user_type' => $request->usaertype,
+            'user_status' => "1",
         ]);
 
         event(new Registered($user));

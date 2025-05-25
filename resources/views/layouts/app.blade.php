@@ -10,18 +10,37 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="" name="description" />
         <meta content="" name="author" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <!-- App favicon -->
-        <link rel="shortcut icon" href="assets/images/favicon.ico">
+        <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+        <link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Layout config Js -->
-        <script src="{{ url('assets/js/layout.js') }}"></script>
+        <script src="{{ asset('assets/js/layout.js') }}"></script>
         <!-- Bootstrap Css -->
-        <link href="{{ url('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+
+        <!-- <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" /> -->
+
         <!-- Icons Css -->
-        <link href="{{ url('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
+
+        <!-- Icons Css -->
+        <link href="{{ asset('assets/css/intlTelInput.css') }}" rel="stylesheet" type="text/css" />
+
+        <link rel="stylesheet" href="{{ asset('assets/libs/dropzone/dropzone.css') }}" type="text/css" />
+
+        <!-- Filepond css -->
+        <link rel="stylesheet" href="{{ asset('assets/libs/filepond/filepond.min.css') }}" type="text/css" />
+        <link rel="stylesheet" href="{{ asset('assets/libs/filepond-plugin-image-preview/filepond-plugin-image-preview.min.css') }}">
+
+        <!-- Toastr CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+
         <!-- App Css-->
-        <link href="{{ url('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     </head>
-<body>
+<body class="siteurl" data-url="{{ url('/') }}">
 
 <!-- Begin page -->
     <div id="layout-wrapper">
@@ -33,19 +52,19 @@
                         <div class="navbar-brand-box horizontal-logo">
                             <a href="dashboard.html" class="logo logo-dark">
                                 <span class="logo-sm">
-                                    <img src="assets/images/logo-sm.png" alt="" height="35">
+                                    <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                                 </span>
                                 <span class="logo-lg">
-                                    <img src="assets/images/logo-light.png" alt="" height="30">
+                                    <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="30">
                                 </span>
                             </a>
 
                             <a href="dashboard.html" class="logo logo-light">
                                 <span class="logo-sm">
-                                    <img src="assets/images/logo-sm.png" alt="" height="35">
+                                    <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                                 </span>
                                 <span class="logo-lg">
-                                    <img src="assets/images/logo-dark.png" alt="" height="30">
+                                    <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="30">
                                 </span>
                             </a>
                         </div>
@@ -114,7 +133,7 @@
 
                                         <div class="text-reset notification-item d-block dropdown-item position-relative">
                                             <div class="d-flex">
-                                                <img src="assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0" alt="user-pic">
+                                                <img src="{{ asset('assets/images/users/avatar-2.jpg') }}" class="me-3 rounded-circle avatar-xs flex-shrink-0" alt="user-pic">
                                                 <div class="flex-grow-1">
                                                     <a href="#!" class="stretched-link">
                                                         <h6 class="mt-0 mb-1 fs-13 fw-semibold">Angela Bernier</h6>
@@ -151,7 +170,7 @@
 
                                         <div class="text-reset notification-item d-block dropdown-item position-relative">
                                             <div class="d-flex">
-                                                <img src="assets/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0" alt="user-pic">
+                                                <img src="{{ asset('assets/images/users/avatar-8.jpg') }}" class="me-3 rounded-circle avatar-xs flex-shrink-0" alt="user-pic">
                                                 <div class="flex-grow-1">
                                                     <a href="#!" class="stretched-link">
                                                         <h6 class="mt-0 mb-1 fs-13 fw-semibold">Maureen Gibson</h6>
@@ -178,7 +197,7 @@
                         <div class="dropdown ms-sm-3 header-item topbar-user">
                             <button type="button" class="btn p-1 radius-100" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="d-flex align-items-center">
-                                    <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg" alt="Header Avatar">
+                                    <img class="rounded-circle header-profile-user" src="{{  asset('assets/images/users/avatar-1.jpg') }}" alt="Header Avatar">
                                     <span class="text-start ms-xl-2">
                                     @if(Auth::check())
                                         <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ Auth::user()->name }}</span>
@@ -191,7 +210,7 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
-                                <h6 class="dropdown-header">Welcome Anna!</h6>
+                                <h6 class="dropdown-header">Welcome {{ Auth::user()->name }}!</h6>
                                 <a class="dropdown-item" href="#"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Profile</span></a>
                                 <a class="dropdown-item" href="#"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
                                 <a class="dropdown-item" href="#"><i class="ri-settings-3-line align-middle me-1"></i> <span class="align-middle">Setting</span></a>
@@ -219,19 +238,19 @@
                 <!-- Dark Logo-->
                 <a href="dashboard.html" class="logo logo-dark">
                     <span class="logo-sm">
-                        <img src="assets/images/logo-sm.png" alt="" height="35">
+                        <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                     </span>
                     <span class="logo-lg">
-                        <img src="assets/images/logo-dark.png" alt="" height="30">
+                        <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="30">
                     </span>
                 </a>
                 <!-- Light Logo-->
                 <a href="dashboard.html" class="logo logo-light">
                     <span class="logo-sm">
-                        <img src="assets/images/logo-sm.png" alt="" height="35">
+                        <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                     </span>
                     <span class="logo-lg">
-                        <img src="assets/images/logo-light.png" alt="" height="30">
+                        <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="30">
                     </span>
                 </a>
                 <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -244,45 +263,71 @@
                     <div id="two-column-menu">
                     </div>
                     <ul class="navbar-nav" id="navbar-nav">
-                        <li class="menu-title"><span data-key="t-menu">Menu</span></li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link active" href="#">
-                                <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#sidebarCustomers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-group-line"></i> <span data-key="t-customers">Customers</span>
-                            </a>
-                            <div class="collapse menu-dropdown" id="sidebarCustomers">
-                                <ul class="nav nav-sm flex-column">
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-garage-owners">Garage Owners</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-search-client">Search Client</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-search-vehicle">Search Vehicle</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-invoice-due">Invoice Due</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-paid-invoices">Paid Invoices</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-sales-reports">Sales Reports</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-manage-tickets">Manage Tickets</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-marketing">Marketing</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
+                        <li class="menu-title"><span data-key="t-menu">Menu</span></li>                        
+                        @auth
+                            @if(auth()->user()->user_type === 'Super Admin')
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link active" href="{{ route('dashboard.super-admin') }}">
+                                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#sidebarCustomers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+                                        <i class="ri-group-line"></i> <span data-key="t-customers">Customers</span>
+                                    </a>
+                                    <div class="collapse menu-dropdown" id="sidebarCustomers">
+                                        <ul class="nav nav-sm flex-column">
+                                            <li class="nav-item">
+                                                <a href="{{ route('garage-owners.index') }}" class="nav-link" data-key="t-garage-owners">Garage Owners</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-search-client">Search Client</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-search-vehicle">Search Vehicle</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-invoice-due">Invoice Due</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-paid-invoices">Paid Invoices</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-sales-reports">Sales Reports</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-manage-tickets">Manage Tickets</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-key="t-marketing">Marketing</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            @endif
+
+                            @if(auth()->user()->user_type === 'Garage Owner')
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link active" href="{{ route('dashboard.garage-owner') }}">
+                                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('clients.index') }}">
+                                        <i class="ri-group-line"></i> <span data-key="t-customers">Clients</span>
+                                    </a>                                    
+                                </li>
+                            @endif
+
+                            @if(auth()->user()->user_type === 'User')
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link active" href="{{ route('dashboard.user') }}">
+                                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
+                                    </a>
+                                </li>
+                            @endif
+                        @endauth
+                        
                         <li class="nav-item">
                             <a class="nav-link menu-link" href="#">
                                 <i class="ri-calendar-check-line"></i> <span data-key="t-booking">Booking</span>
@@ -659,21 +704,64 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <!-- JAVASCRIPT -->
-    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/libs/simplebar/simplebar.min.js"></script>
-    <script src="assets/libs/node-waves/waves.min.js"></script>
-    <script src="assets/libs/feather-icons/feather.min.js"></script>
-    <script src="assets/js/lord-icon-2.1.0.js"></script>
-    <script src="assets/js/plugins.js"></script>
+    <script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
+    <script src="{{ asset('assets/js/lord-icon-2.1.0.js') }}"></script>
+    <script src="{{ asset('assets/js/plugins.js') }}"></script>
+    <script src="{{ asset('assets/libs/choices/choices.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/flatpickr/flatpickr.min.js') }}"></script>
     <!-- echarts js -->
-    <script src="assets/libs/echarts/echarts.min.js"></script>
-    <script src="assets/js/pages/echarts.init.js"></script>
+    <script src="{{ asset('assets/libs/echarts/echarts.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/echarts.init.js') }}"></script>
     <!-- calendar min js -->
-    <script src="assets/libs/fullcalendar/index.global.min.js"></script>
-    <script src="assets/js/pages/calendar.init.js"></script>
+    <!-- <script src="{{ asset('assets/libs/fullcalendar/index.global.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/calendar.init.js') }}"></script> -->
+
+    <script src="{{ asset('assets/libs/prismjs/prism.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/form-validation.init.js') }}"></script>
+
+    <script src="{{ asset('assets/libs/pickr/pickr.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/form-pickers.init.js') }}"></script>
+
+    <script src="{{ asset('assets/js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/select2.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/select2.init.js') }}"></script>
+
+    <!-- dropzone min -->
+    <script src="{{ asset('assets/libs/dropzone/dropzone-min.js') }}"></script>
+    <!-- filepond js -->
+    <script src="{{ asset('assets/libs/filepond/filepond.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/filepond-plugin-image-preview/filepond-plugin-image-preview.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/filepond-plugin-file-validate-size/filepond-plugin-file-validate-size.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/filepond-plugin-image-exif-orientation/filepond-plugin-image-exif-orientation.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/filepond-plugin-file-encode/filepond-plugin-file-encode.min.js') }}"></script>
+
+    <script src="{{ asset('assets/js/pages/form-file-upload.init.js') }}"></script>
+
+    <script src="{{ asset('assets/js/intlTelInputWithUtils.js') }}"></script>
+
+    <!-- JAVASCRIPT -->
+    <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <!-- App js -->
-    <script src="assets/js/app.js"></script>
+    <script src="{{ asset('assets/js/parsley.js') }}"></script>
+    <script src="{{ asset('assets/js/app.js') }}"></script>
+    <!-- Custom Data table js -->
+    <script src="{{ asset('assets/js/datatable.js') }}"></script>
+
+    <script>
+        flatpickr(".dateformat", {
+            dateFormat: "Y-m-d", // 2025-05-25 14:30
+        });
+
+    </script>
+    
 </body>
 
 </html>
