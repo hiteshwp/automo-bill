@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\user;
-use App\Models\country;
-use App\Models\state;
-use App\Models\city;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
 use Yajra\DataTables\DataTables;
 
 class GarageOwnerController extends Controller
@@ -18,9 +18,9 @@ class GarageOwnerController extends Controller
         }
 
         $garageOwners = User::where('user_type', 'Garage Owner')->get();
-        $countries = country::all();
-        $states = state::all();
-        $cities = city::all();
+        $countries = Country::all();
+        $states = State::all();
+        $cities = City::all();
         return view('garage-owners.index', compact('garageOwners', 'countries', 'states', 'cities'));
     }
 
