@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\user;
-use App\Models\country;
-use App\Models\state;
-use App\Models\city;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -32,9 +32,9 @@ class AdminController extends Controller
         $user_id = $user->id;
 
         $adminList = User::where('user_type', 'Admin')->get();
-        $countries = country::all();
-        $states = state::all();
-        $cities = city::all();
+        $countries = Country::all();
+        $states = State::all();
+        $cities = City::all();
         return view('admin.admin.index', compact('adminList', 'countries', 'states', 'cities'));
     }
 
