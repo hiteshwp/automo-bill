@@ -684,6 +684,5 @@ $(document).ready(function() {
             });
         }
     });
-
     // Admin Section related details end
 });
