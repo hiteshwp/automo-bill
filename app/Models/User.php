@@ -6,11 +6,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +33,9 @@ class User extends Authenticatable
         'zip',
         'website',
         'user_type',
+        'garage_owner_id',
+        'user_join_date',
+        'user_left_date'
     ];
 
     /**
@@ -63,4 +68,20 @@ class User extends Authenticatable
     public function isGarageOwner() {
         return $this->user_type === 'Garage Owner';
     }
+
+    public function subscription()
+    {
+        return $this->hasOne(\App\Models\Subscription::class);
+    }
+
+    public function hasActiveSubscription()
+    {
+        $sub = $this->subscription;
+
+        return $sub &&
+            $sub->status === 'active' &&
+            $sub->start_date <= now() &&
+            $sub->end_date >= now();
+    }
+
 }
