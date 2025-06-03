@@ -9,9 +9,9 @@ use Storage;
 
 use Illuminate\Http\Request;
 use App\Models\user;
-use App\Models\country;
-use App\Models\state;
-use App\Models\city;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -36,7 +36,7 @@ class ClientsController extends Controller
         $user_id = $user->id;
 
         $users = User::where('id', $user_id)->get();
-        $countries = country::all();
+        $countries = Country::all();
         // $states = state::all();
         // $cities = city::all();
         return view('garage-owner.clients.index', compact('users', 'countries'));
