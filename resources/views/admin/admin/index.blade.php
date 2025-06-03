@@ -95,7 +95,7 @@
                     <div class="col-12 col-md-6 col-lg-6">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="newadminemail">Email*</label>
-                            <input type="text" class="form-control" name="newadminemail" id="newadminemail" required placeholder="Enter your email" />
+                            <input type="email" class="form-control" name="newadminemail" id="newadminemail" required placeholder="Enter your email" />
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-6">
@@ -226,7 +226,7 @@
                     <div class="col-12 col-md-6 col-lg-6">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="updateadminemail">Email*</label>
-                            <input type="text" class="form-control" name="updateadminemail" id="updateadminemail" required placeholder="Enter your email" />
+                            <input type="email" class="form-control" name="updateadminemail" id="updateadminemail" required placeholder="Enter your email" />
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-6">

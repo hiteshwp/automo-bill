@@ -17,6 +17,7 @@ class SuperAdminSeeder extends Seeder
         DB::table('users')->insert([
             'name' => 'Super Admin',
             'businessname' => 'Admin Business',
+            'countryisocode' => 'us',
             'countrycode' => '1',
             'mobilenumber' => '1234567890',
             'email' => 'admin@automo-bill.com',

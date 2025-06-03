@@ -9,10 +9,13 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="page-title-box p-0 d-sm-flex align-items-center justify-content-between">
-                            <h4 class="mb-sm-0">Clients</h4>
+                            <h4 class="mb-sm-0">Garage Owners</h4>
                             <div class="page-title-action-list d-flex gap-2">
                                 <div class="page-title-action-item">
                                     <a href="javascript:void(0);" class="btn btn-warning">Compose Promotional Email</a>
+                                </div>
+                                <div class="page-title-action-item">
+                                    <button type="button" class="btn btn-light" data-bs-toggle="offcanvas" data-bs-target="#sidebarExplore" aria-controls="offcanvasRight"><i class="ri-indent-decrease"></i> Explore</button>
                                 </div>
                             </div>
                         </div>
@@ -26,9 +29,23 @@
         <div class="row">
             <div class="col-xl-12">
                 <div class="card">
+                    <div class="card-header align-items-center d-flex">
+                        <h4 class="card-title mb-0 flex-grow-1">Garage Owners List</h4>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Plan Type</button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">All</a>
+                                <a class="dropdown-item" href="#">Monthly</a>
+                                <a class="dropdown-item" href="#">Annually</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">PayAsYou Go</a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card-body">
                         <div class="table-block table-responsive">
-                        <table id="garageOwnersClientsTable" class="table table-hover table-bordered w-100" data-route="{{ route('clients.data') }}">
+                        <table id="garageOwnersTable" class="table table-hover table-bordered w-100" data-route="{{ route('admin.garage-owners.data') }}">
                             <thead>
                                 <tr>
                                     <th>ID</th>

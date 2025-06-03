@@ -35,7 +35,9 @@ class User extends Authenticatable
         'user_type',
         'garage_owner_id',
         'user_join_date',
-        'user_left_date'
+        'user_left_date',
+        'countryisocode',
+        'countrycode'
     ];
 
     /**

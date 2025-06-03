@@ -21,7 +21,7 @@ class GarageOwnerController extends Controller
         $countries = Country::all();
         $states = State::all();
         $cities = City::all();
-        return view('garage-owners.index', compact('garageOwners', 'countries', 'states', 'cities'));
+        return view('admin.garage-owners.index', compact('garageOwners', 'countries', 'states', 'cities'));
     }
 
     public function getData(Request $request)
@@ -81,7 +81,7 @@ class GarageOwnerController extends Controller
                 return '
                     <button type="button" class="btn btn-soft-primary btn-border btn-icon shadow-none viewgarageownerdata" title="View" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewInformation" aria-controls="offcanvasRight" data-id="'.$owner->id.'"><i class="ri-eye-line"></i></button>
                     <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none editgarageownerdata" title="Edit" data-bs-toggle="offcanvas" data-bs-target="#sidebarEditGarageOwner" aria-controls="offcanvasRight" data-id="'.$owner->id.'"><i class="ri-edit-line"></i></button>
-                    <a href="'.route('garage.clients.page', $owner->id).'" class="btn btn-soft-secondary btn-border btn-icon shadow-none" title="Manage Client"><i class="ri-user-community-line"></i></a>
+                    <a href="'.route('admin.garage.clients.page', $owner->id).'" class="btn btn-soft-secondary btn-border btn-icon shadow-none" title="Manage Client"><i class="ri-user-community-line"></i></a>
                     <a href="#" class="btn btn-soft-info btn-border btn-icon shadow-none" title="View Subscription History"><i class="ri-history-line"></i></a>
                     <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none removeNotificationModal" title="Delete" data-bs-toggle="offcanvas" data-bs-target="#removeNotificationModal" aria-controls="offcanvasRight" data-id="'.$owner->id.'"><i class="ri-delete-bin-6-line"></i></button>
                 ';
@@ -205,7 +205,7 @@ class GarageOwnerController extends Controller
         $garageOwners = User::where('id', $id)
                      ->where('user_type', 'Garage Owner')
                      ->firstOrFail();
-        return view('garage-owners.clients', compact('garageOwners'));
+        return view('admin.garage-owners.clients', compact('garageOwners'));
     }
 
     public function getClientData($id, Request $request)
@@ -246,7 +246,7 @@ class GarageOwnerController extends Controller
                 }
             })
             ->addColumn('action', fn($user) =>
-                '<a href="'.route('client.clientdetails', $user->id).'" class="btn btn-soft-primary btn-border btn-icon shadow-none"><i class="ri-eye-line"></i></a>
+                '<a href="'.route('admin.client.clientdetails', $user->id).'" class="btn btn-soft-primary btn-border btn-icon shadow-none"><i class="ri-eye-line"></i></a>
                 <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></button>
                 <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Delete"><i class="ri-delete-bin-6-line"></i></button>'
             )
@@ -263,7 +263,7 @@ class GarageOwnerController extends Controller
         $clientDetails = User::where('id', $id)
                      ->where('user_type', 'user')
                      ->firstOrFail();
-        return view('garage-owners.clientdetails', compact('clientDetails'));
+        return view('admin.garage-owners.clientdetails', compact('clientDetails'));
     }
 
 }
