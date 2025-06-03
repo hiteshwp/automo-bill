@@ -1250,7 +1250,6 @@ $(document).ready(function() {
             }
         });
     });
-
     // Garage Owner Client's Vehicle Detail end
 
 });
