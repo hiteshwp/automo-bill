@@ -208,6 +208,7 @@
                                     <div class="mt-4">
                                         <button class="btn btn-primary w-100" type="submit">Sign Up</button>
                                         <input type="hidden" name="phonecode" class="hdnphonecode" value="{{ old('phonecode', '1') }}" id="hdnphonecode"/>
+                                        <input type="hidden" name="isocode" class="hdnisocode" value="{{ old('isocode', 'us') }}" id="hdnisocode"/>
                                     </div>
     
                                     <div class="mt-4 text-left">
@@ -328,11 +329,13 @@
 
         // Get the hidden input field
         const hiddenPhoneCodeInput = document.querySelector("#hdnphonecode");
+        const hiddenIsoCodeInput = document.querySelector("#hdnisocode");
 
         // Function to update hidden input with the selected dial code
         const updateHiddenPhoneCode = () => {
             const selectedCountryData = iti.getSelectedCountryData();
             hiddenPhoneCodeInput.value = selectedCountryData.dialCode; // Get the dial code
+            hiddenIsoCodeInput.value = selectedCountryData.iso2; // Get the dial code
             console.log('Selected dial code:', selectedCountryData.dialCode);
         };
 
@@ -397,7 +400,7 @@
         $(document).ready(function () {
             //$("#frmregister").parsley();
 
-            let baseUrl = window.location.origin + "/automo-bill/public"; // Dynamically get base URL
+            let baseUrl = window.location.origin; // Dynamically get base URL
 
             let selectedCountry = "{{ old('country') }}";
             let selectedState = "{{ old('state') }}";

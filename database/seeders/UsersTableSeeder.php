@@ -21,13 +21,26 @@ class UsersTableSeeder extends Seeder
         // Step 1: Create 20 Garage Owners
         $garageOwnerIds = [];
 
+        $countryMap = [
+            'us' => '1',
+            'in' => '91',
+            'ca' => '1',
+            'au' => '61',
+            'nz' => '64',
+        ];
+
         for ($i = 0; $i < 50; $i++) {
+
+            $countryIsoCode = $faker->randomElement(array_keys($countryMap));
+            $countryCode = $countryMap[$countryIsoCode];
+
             $garageOwner = User::create([
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
-                'password' => Hash::make('password'),
+                'password' => Hash::make('User@123'),
                 'businessname' => $faker->company,
-                'countrycode' => $faker->randomElement(['+1', '+44', '+91', '+33', '+49', '+61']),
+                'countryisocode' => $countryIsoCode,
+                'countrycode' => $countryCode,
                 'mobilenumber' => $faker->numerify('##########'),
                 'taxnumber' => $faker->bothify('TAX-####-####'),
                 'address' => $faker->address,
@@ -47,12 +60,17 @@ class UsersTableSeeder extends Seeder
 
         // Step 2: Create 80 normal Users and assign garage_owner_id randomly
         for ($i = 0; $i < 200; $i++) {
+
+            $countryIsoCode = $faker->randomElement(array_keys($countryMap));
+            $countryCode = $countryMap[$countryIsoCode];
+
             User::create([
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
                 'password' => Hash::make('password'),
                 'businessname' => $faker->company,
-                'countrycode' => $faker->randomElement(['+1', '+44', '+91', '+33', '+49', '+61']),
+                'countryisocode' => $countryIsoCode,
+                'countrycode' => $countryCode,
                 'mobilenumber' => $faker->numerify('##########'),
                 'taxnumber' => $faker->bothify('TAX-####-####'),
                 'address' => $faker->address,

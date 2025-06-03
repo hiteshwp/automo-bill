@@ -203,6 +203,8 @@ $(document).ready(function() {
                         toastr.success(res.message);
                         $('#garageOwnersTable').DataTable().ajax.reload(null, false);
                         $('#sidebarEditGarageOwner').offcanvas('hide');
+                        $('#frmeditgarageownerdata').trigger("reset");
+                        $('#frmeditgarageownerdata').parsley().reset();
                         $('#garageOwnerTable').DataTable().ajax.reload();
                     }
                 },
@@ -331,14 +333,14 @@ $(document).ready(function() {
             },
             stateSave: true,
             columns: [
-                { data: 'id', name: 'id' },
-                { data: 'name', name: 'name' },
-                { data: 'email', name: 'email' },
-                { data: 'email', name: 'email' },
-                { data: 'email', name: 'email' },
-                { data: 'email', name: 'email' },
-                { data: 'mobilenumber', name: 'mobilenumber' },
-                { data: 'status', name: 'status' },
+                { data: 'id', name: 'users.id' },
+                { data: 'name', name: 'users.name' },
+                { data: 'email', name: 'users.email' },
+                { data: 'mobilenumber', name: 'users.mobilenumber' },
+                { data: 'user_type', name: 'users.user_type', orderable: false, searchable: false },
+                { data: 'country_name', name: 'tbl_countries.name' },
+                { data: 'zip', name: 'users.zip' },
+                { data: 'status', name: 'users.user_status' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ],
             order: [[0, 'asc']], // Default sorting by ID
@@ -347,9 +349,7 @@ $(document).ready(function() {
         });
     }
     
-
     // Admin Section related details start
-
     let dataAdminRoute = $('#adminAdminListingTable').data('route');
     let csrfAdminToken = $('meta[name="csrf-token"]').attr('content');
     if ($('#adminAdminListingTable').length) 
@@ -438,6 +438,8 @@ $(document).ready(function() {
                         toastr.success(res.message);
                         $('#adminAdminListingTable').DataTable().ajax.reload(null, false);
                         $('#sidebarAddAdmin').offcanvas('hide');
+                        $('#frmnewadmindata').trigger("reset");
+                        $('#frmnewadmindata').parsley().reset();
                     }
                     else
                     {
@@ -650,6 +652,8 @@ $(document).ready(function() {
                         toastr.success(res.message);
                         $('#adminAdminListingTable').DataTable().ajax.reload(null, false);
                         $('#sidebarUpdateAdmin').offcanvas('hide');
+                        $('#frmupdateadmindata').trigger("reset");
+                        $('#frmupdateadmindata').parsley().reset();
                     }
                     else
                     {
@@ -685,4 +689,568 @@ $(document).ready(function() {
         }
     });
     // Admin Section related details end
+
+    // Client Section related details start
+    $('.drpcountry').on('change', function () {
+        let countryId = $(this).val();
+        $('.drpstate').empty().append('<option value="">Select State</option>');
+        $('.drpcity').empty().append('<option value="">Select City</option>');
+        if (countryId) {
+            loadStates(countryId, null);
+        }
+    });
+
+    $('.drpstate').on('change', function () {
+        let stateId = $(this).val();
+        $('.drpcity').empty().append('<option value="">Select City</option>');
+        if (stateId) {
+            loadCities(stateId, null);
+        }
+    });
+
+    function loadStates(countryId, preSelectedState) {
+        $.ajax({
+            url: baseUrl + '/get-states/' + countryId,
+            type: 'GET',
+            success: function (states) {
+                $('.drpstate').empty().append('<option value="">Select State</option>');
+                $.each(states, function (id, name) {
+                    $('.drpstate').append('<option value="' + id + '">' + name + '</option>');
+                });
+
+                if (preSelectedState) {
+                    $('.drpstate').val(preSelectedState);
+                    loadCities(preSelectedState, selectedCity);
+                }
+            }
+        });
+    }
+
+    function loadCities(stateId, preSelectedCity) {
+        $.ajax({
+            url: baseUrl + '/get-cities/' + stateId,
+            type: 'GET',
+            success: function (cities) {
+                $('.drpcity').empty().append('<option value="">Select City</option>');
+                $.each(cities, function (id, name) {
+                    $('.drpcity').append('<option value="' + id + '">' + name + '</option>');
+                });
+
+                if (preSelectedCity) {
+                    $('.drpcity').val(preSelectedCity);
+                }
+            }
+        });
+    }
+
+    // $("#btnnewaddclient").on('click', function () {
+    //     console.log("Hello");
+    // });
+
+    $('#frmaddnewinformation').parsley();
+    $('#frmaddnewinformation').on('submit', function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        if($('#frmaddnewinformation').parsley().isValid())
+        {
+            let form = $(this);
+
+            $.ajax({
+                url: baseUrl + '/clients/store',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnaddnewclient").prop('disabled', true).text('Saving...');
+                },
+                success: function (res) {
+                    $("#btnaddnewclient").prop('disabled', false).text('Save');
+                    if (res.status === 'success') 
+                    {
+                        toastr.success(res.message);
+                        $('#garageOwnersClientsTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarNewClient').offcanvas('hide');
+                        // Reset form and Parsley validation
+                        $('#frmaddnewinformation').trigger("reset");
+                        $('#frmaddnewinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnaddnewclient").prop('disabled', false).text('Save');
+                    let res = xhr.responseJSON;
+
+                    if (res.status === 'error' && typeof res.message === 'object') {
+                        for (let field in res.message) {
+                            if (res.message.hasOwnProperty(field)) {
+                                toastr.error(res.message[field][0]); // Show the first error for each field
+                            }
+                        }
+                    } else {
+                        toastr.error('Something went wrong. Please try again.');
+                    }
+                }
+            });
+        }
+    });
+    
+    $(document).on('click', '.editviewclientdetails', function () {
+        const userId = $(this).data('id');
+        console.log(userId);
+        $.ajax({
+            url: baseUrl + '/clients/view',
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                userId: userId
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $("#sidebarUpdateClient").addClass("offcanvas-loader");
+            },
+            success: function (data) {
+                $("#sidebarUpdateClient").removeClass("offcanvas-loader");
+                // Populate the form fields
+                $('#txtupdateclientname').val(data.name);
+                $('#txtupdateclientemail').val(data.email);
+                $('#txtupdateclientmobilenumber').val(data.mobilenumber);
+                $('#txtupdateclientlandlinenumber').val(data.landlinenumber);
+                $('#txtupdateclientcountry').val(data.country_id);
+                $('#txtupdateclientaddress').val(data.address);
+                $('#updateclientid').val(data.id);
+                $('#txtupdateclientstate').html("");
+                $('#txtupdateclientcity').html("");
+                $('#txtupdateclientstate').append('<option value="">Select State</option>');
+                $('#txtupdateclientcity').append('<option value="">Select City</option>');
+                $.each(data.states, function(key, state) {
+                    $('#txtupdateclientstate').append(`<option value="${state.id}">${state.name}</option>`);
+                });
+
+                $.each(data.cities, function(key, city) {
+                    $('#txtupdateclientcity').append(`<option value="${city.id}">${city.name}</option>`);
+                });
+
+                $('#txtupdateclientstate').val(data.state_id);
+                $('#txtupdateclientcity').val(data.city_id);
+
+                 // ✅ Set flag and number correctly
+                const input = document.querySelector("#txtupdateclientmobilenumber");
+                const itiInstance = input._iti;
+                const IsoCode = data.countryisocode;     // e.g., 'dz'
+                const phone = data.mobilenumber;         // e.g., '5584694128'
+
+                if (itiInstance) {
+                    itiInstance.setCountry(IsoCode);     // sets flag
+                    input.value = phone;                 // sets number
+                }
+
+            },
+            error: function(xhr, error, thrown) {
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+
+    $('#frmclientupdateinformation').parsley();
+    $('#frmclientupdateinformation').on('submit', function (e) {
+        e.preventDefault();
+        if($('#frmclientupdateinformation').parsley().isValid())
+        {
+            let form = $(this);
+            let formData = new FormData(this);
+        
+            $.ajax({
+                url: baseUrl + '/clients/update',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnupdatelient").prop('disabled', true).text('Updating...');
+                },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        $("#btnupdatelient").prop('disabled', false).text('Update');
+                        toastr.success(res.message);
+                        $('#garageOwnersClientsTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarUpdateClient').offcanvas('hide');
+                        $('#frmclientupdateinformation').trigger("reset");
+                        $('#frmclientupdateinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnupdatelient").prop('disabled', false).text('Update');
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            let input = $('#txtedit' + key.replace(/_/g, ''));
+                            input.addClass('is-invalid');
+                            input.after('<div class="invalid-feedback d-block">' + errors[key][0] + '</div>');
+                        }
+                    } else {
+                        toastr.error('Something went wrong.');
+                    }
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '.removeClientNotificationModal', function () {
+        const userId = $(this).data('id');
+        $("#txtdeleteclientid").val(userId);
+    });
+
+    $(document).on('click', '#delete-client-notification', function () {
+        const userId = $("#txtdeleteclientid").val();
+        $.ajax({
+            url: baseUrl + '/clients/remove-details/'+userId,
+            type: 'DELETE',
+            data: {
+                _token: csrfToken,
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $(this).prop('disabled', true).text('Deleting...');
+            },
+            success: function (res) {
+                toastr.success(res.message);
+                $(this).prop('disabled', false).text('Yes, Delete It!');
+                $('#removeClientNotificationModal').offcanvas('hide');
+                $('#garageOwnersClientsTable').DataTable().ajax.reload(null, false);
+            },
+            error: function(xhr, error, thrown) {
+                $(this).prop('disabled', true).text('Yes, Delete It!');
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+    // Client Section related details end
+
+    // Garage Owner Client's Vehicle Detail start
+    let dataVehicleRoute = $('#garageOwnersVehicleTable').data('route');
+    let currentcustomerid = $('#garageOwnersVehicleTable').data('customerid');
+    if ($('#garageOwnersVehicleTable').length) 
+    {
+        $('#garageOwnersVehicleTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url:dataVehicleRoute,
+                type: "POST",
+                data: function (d) {
+                    d.customer_id = currentcustomerid; // Pass customer ID to server
+                },
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                },
+                error: function(xhr, error, thrown) {
+                    if (xhr.status === 401) {
+                        alert("Session expired. Redirecting to login...");
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("DataTable load error:", xhr.responseText);
+                    }
+                }
+            },
+            stateSave: true,
+            columns: [
+                { data: 'id', name: 'tbl_vehicles.id' },
+                { data: 'vin', name: 'tbl_vehicles.vin' },
+                { data: 'number_plate', name: 'tbl_vehicles.number_plate' },
+                { data: 'modelyear', name: 'tbl_vehicles.modelyear' },
+                { data: 'modelname', name: 'tbl_vehicles.modelname' },
+                { data: 'modelbrand', name: 'tbl_vehicles.modelbrand' },
+                { data: 'vehicle_status', name: 'tbl_vehicles.vehicle_status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            order: [[0, 'asc']], // Default sorting by ID
+            lengthMenu: [10, 25, 50, 100], // Records per page options
+            pageLength: 10, // Default records per page
+        });
+    }
+
+    $('#frmaddnewvehicleinformation').parsley();
+    $('#frmaddnewvehicleinformation').on('submit', function (e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+
+        if($('#frmaddnewvehicleinformation').parsley().isValid())
+        {
+            let form = $(this);
+
+            $.ajax({
+                url: baseUrl + '/clients/vehicles/store',
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnnewvehicledetail").prop('disabled', true).text('Submitting...');
+                },
+                success: function (res) {
+                    $("#btnnewvehicledetail").prop('disabled', false).text('Submit');
+                    if (res.status === 'success') 
+                    {
+                        toastr.success(res.message);
+                        $('#garageOwnersVehicleTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarNewVehicle').offcanvas('hide');
+                        $('#frmaddnewvehicleinformation').trigger("reset");
+                        $('#frmaddnewvehicleinformation').parsley().reset();
+                        $("#vehiclecustomerid").val(currentcustomerid);
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnnewvehicledetail").prop('disabled', false).text('Submit');
+                    let res = xhr.responseJSON;
+
+                    if (res.status === 'error' && typeof res.message === 'object') {
+                        for (let field in res.message) {
+                            if (res.message.hasOwnProperty(field)) {
+                                toastr.error(res.message[field][0]); // Show the first error for each field
+                            }
+                        }
+                    } else {
+                        toastr.error('Something went wrong. Please try again.');
+                    }
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '.editviewvehicledetails', function () {
+        const vehicleId = $(this).data('id');
+        $.ajax({
+            url: baseUrl + '/clients/vehicles/view',
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                vehicleId: vehicleId
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $("#sidebarEditVehicle").addClass("offcanvas-loader");
+            },
+            success: function (data) {
+                $("#sidebarEditVehicle").removeClass("offcanvas-loader");
+                // Populate the form fields
+                $('#txtupdatevehiclevindetails').val(data.vin);
+                $('#txtupdatevehiclelicenceplate').val(data.number_plate);
+                $('#txtupdatevehiclemake').val(data.modelbrand);
+                $('#txtupdatevehiclemodel').val(data.modelname);
+                $('#txtupdatevehiclemakeyear').val(data.modelyear);
+                $('#txtupdatevehiclelastservicedate').val(data.lastservice);
+                $('#txtupdatevehicleid').val(data.id);
+
+                $('.dateformat').each(function () {
+                    flatpickr(this, {
+                        dateFormat: "Y-m-d",
+                        defaultDate: this.value.trim() || null,
+                        allowInput: true,
+                    });
+                  });
+            },
+            error: function(xhr, error, thrown) {
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+
+    $('#frmeditvehicleinformation').parsley();
+    $('#frmeditvehicleinformation').on('submit', function (e) {
+        e.preventDefault();
+        if($('#frmeditvehicleinformation').parsley().isValid())
+        {
+            let form = $(this);
+            let formData = new FormData(this);
+        
+            $.ajax({
+                url: baseUrl + '/clients/vehicles/update',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnupdatevehicledetail").prop('disabled', true).text('Updating...');
+                },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        $("#btnupdatevehicledetail").prop('disabled', false).text('Update');
+                        toastr.success(res.message);
+                        $('#garageOwnersVehicleTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarEditVehicle').offcanvas('hide');
+                        $('#frmeditvehicleinformation').trigger("reset");
+                        $('#frmeditvehicleinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnupdatevehicledetail").prop('disabled', false).text('Update');
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            let input = $('#txtedit' + key.replace(/_/g, ''));
+                            input.addClass('is-invalid');
+                            input.after('<div class="invalid-feedback d-block">' + errors[key][0] + '</div>');
+                        }
+                    } else {
+                        toastr.error('Something went wrong.');
+                    }
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '.removeVehicleNotificationModal', function () {
+        const vehicleId = $(this).data('id');
+        $("#txtdeletevehicleid").val(vehicleId);
+    });
+
+    $(document).on('click', '#delete-vehicle-notification', function () {
+        const vehicleId = $("#txtdeletevehicleid").val();
+        $.ajax({
+            url: baseUrl + '/clients/vehicles/remove-details/'+vehicleId,
+            type: 'DELETE',
+            data: {
+                _token: csrfToken,
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $(this).prop('disabled', true).text('Deleting...');
+            },
+            success: function (res) {
+                toastr.success(res.message);
+                $(this).prop('disabled', false).text('Yes, Delete It!');
+                $('#removeVechicleNotificationModal').offcanvas('hide');
+                $('#garageOwnersVehicleTable').DataTable().ajax.reload(null, false);
+            },
+            error: function(xhr, error, thrown) {
+                $(this).prop('disabled', true).text('Yes, Delete It!');
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+
+    // Garage Owner Client's Vehicle Detail end
+
 });

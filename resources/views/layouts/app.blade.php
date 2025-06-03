@@ -50,7 +50,17 @@
                     <div class="d-flex">
                         <!-- LOGO -->
                         <div class="navbar-brand-box horizontal-logo">
-                            <a href="dashboard.html" class="logo logo-dark">
+                        @auth
+                            @if(auth()->user()->user_type === 'Super Admin')
+                                <a href="{{ route('dashboard.super-admin') }}" class="logo logo-dark">
+                            @endif
+                            @if(auth()->user()->user_type === 'Garage Owner')
+                                <a href="{{ route('dashboard.garage-owner') }}" class="logo logo-dark">
+                            @endif
+                            @if(auth()->user()->user_type === 'User')
+                                <a href="{{ route('dashboard.user') }}" class="logo logo-dark">
+                            @endif
+                        @endauth
                                 <span class="logo-sm">
                                     <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                                 </span>
@@ -59,7 +69,17 @@
                                 </span>
                             </a>
 
-                            <a href="dashboard.html" class="logo logo-light">
+                            @auth
+                                @if(auth()->user()->user_type === 'Super Admin')
+                                    <a href="{{ route('dashboard.super-admin') }}" class="logo logo-light">
+                                @endif
+                                @if(auth()->user()->user_type === 'Garage Owner')
+                                    <a href="{{ route('dashboard.garage-owner') }}" class="logo logo-light">
+                                @endif
+                                @if(auth()->user()->user_type === 'User')
+                                    <a href="{{ route('dashboard.user') }}" class="logo logo-light">
+                                @endif
+                            @endauth
                                 <span class="logo-sm">
                                     <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                                 </span>
@@ -213,6 +233,9 @@
                                 <h6 class="dropdown-header">Welcome {{ Auth::user()->name }}!</h6>
                                 <a class="dropdown-item" href="#"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Profile</span></a>
                                 <a class="dropdown-item" href="#"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
+                                @if(auth()->user()->user_type === 'Super Admin')
+                                    <a class="dropdown-item" href="{{ route('admin.index') }}"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Admin List</span></a>
+                                @endif
                                 <a class="dropdown-item" href="#"><i class="ri-settings-3-line align-middle me-1"></i> <span class="align-middle">Setting</span></a>
                                 <a class="dropdown-item" href="#"><i class="ri-lock-line align-middle me-1"></i> <span class="align-middle">Lock screen</span></a>
                                 <a class="dropdown-item" href="{{ route('logout') }}"><i class="ri-logout-box-r-line align-middle me-1"></i> <span class="align-middle" data-key="t-logout">Logout</span></a>
@@ -236,7 +259,17 @@
             <!-- LOGO -->
             <div class="navbar-brand-box">
                 <!-- Dark Logo-->
-                <a href="dashboard.html" class="logo logo-dark">
+                @auth
+                    @if(auth()->user()->user_type === 'Super Admin')
+                        <a href="{{ route('dashboard.super-admin') }}" class="logo logo-dark">
+                    @endif
+                    @if(auth()->user()->user_type === 'Garage Owner')
+                        <a href="{{ route('dashboard.garage-owner') }}" class="logo logo-dark">
+                    @endif
+                    @if(auth()->user()->user_type === 'User')
+                        <a href="{{ route('dashboard.user') }}" class="logo logo-dark">
+                    @endif
+                @endauth
                     <span class="logo-sm">
                         <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                     </span>
@@ -245,7 +278,17 @@
                     </span>
                 </a>
                 <!-- Light Logo-->
-                <a href="dashboard.html" class="logo logo-light">
+                @auth
+                    @if(auth()->user()->user_type === 'Super Admin')
+                        <a href="{{ route('dashboard.super-admin') }}" class="logo logo-light">
+                    @endif
+                    @if(auth()->user()->user_type === 'Garage Owner')
+                        <a href="{{ route('dashboard.garage-owner') }}" class="logo logo-light">
+                    @endif
+                    @if(auth()->user()->user_type === 'User')
+                        <a href="{{ route('dashboard.user') }}" class="logo logo-light">
+                    @endif
+                @endauth
                     <span class="logo-sm">
                         <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="35">
                     </span>
@@ -278,7 +321,7 @@
                                     <div class="collapse menu-dropdown" id="sidebarCustomers">
                                         <ul class="nav nav-sm flex-column">
                                             <li class="nav-item">
-                                                <a href="{{ route('garage-owners.index') }}" class="nav-link" data-key="t-garage-owners">Garage Owners</a>
+                                                <a href="{{ route('admin.garage-owners.index') }}" class="nav-link" data-key="t-garage-owners">Garage Owners</a>
                                             </li>
                                             <li class="nav-item">
                                                 <a href="#" class="nav-link" data-key="t-search-client">Search Client</a>
@@ -313,7 +356,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="{{ route('clients.index') }}">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.clients.index') }}">
                                         <i class="ri-group-line"></i> <span data-key="t-customers">Clients</span>
                                     </a>                                    
                                 </li>
@@ -739,6 +782,7 @@
 
     <script src="{{ asset('assets/js/pages/form-file-upload.init.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
     <script src="{{ asset('assets/js/intlTelInputWithUtils.js') }}"></script>
 
     <!-- JAVASCRIPT -->
@@ -753,14 +797,90 @@
     <script src="{{ asset('assets/js/parsley.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
     <!-- Custom Data table js -->
-    <script src="{{ asset('assets/js/datatable.js') }}"></script>
 
     <script>
+        //let iti;
+        get_phone_code("#txtclientmobilenumber", "#btn-client", "#error-msg-client", "#valid-msg-client", "#newclientphonecode", "#newclientphoneicocode");
+        get_phone_code("#txtupdateclientmobilenumber", "#btn-update", "#error-msg-update", "#valid-msg-update", "#updateclientphonecode", "#updateclientphoneicocode");
+
+        function get_phone_code(selector, btnId, errorId, validId, phonecode, isocode) {
+            const input = document.querySelector(selector);
+            const button = document.querySelector(btnId);
+            const errorMsg = document.querySelector(errorId);
+            const validMsg = document.querySelector(validId);
+            if (!input) return;
+
+            const iti = window.intlTelInput(input, {
+                initialCountry: "us",
+                separateDialCode: true,
+            });
+
+            // Optionally store the instance on the element itself if needed later
+            input._iti = iti;
+
+            const errorMap = ["Invalid number", "Invalid country code", "Too short", "Too long", "Invalid number"];
+
+            // Get the hidden input field
+            const hiddenPhoneCodeInput = document.querySelector(phonecode);
+            const hiddenPhoneIsoCodeInput = document.querySelector(isocode);
+
+            // Function to update hidden input with the selected dial code
+            const updateHiddenPhoneCode = () => {
+                const selectedCountryData = iti.getSelectedCountryData();
+                hiddenPhoneCodeInput.value = selectedCountryData.dialCode; // Get the dial code
+                hiddenPhoneIsoCodeInput.value = selectedCountryData.iso2; // Get the dial code
+                console.log('Selected dial code:', selectedCountryData.dialCode);
+                console.log('Selected ISO code:', selectedCountryData.iso2);
+            };
+
+            // Update the hidden input when the country flag is clicked
+            input.addEventListener('countrychange', updateHiddenPhoneCode);
+
+            const reset = () => {
+                input.classList.remove("error");
+                errorMsg.innerHTML = "";
+                validMsg.innerHTML = "";
+                errorMsg.classList.add("hide");
+                validMsg.classList.add("hide");
+            };
+
+            const showError = (msg) => {
+                input.classList.add("error");
+                errorMsg.innerHTML = msg;
+                errorMsg.classList.remove("hide");
+            };
+
+            // Button click validate for this input only
+            button.addEventListener('click', () => {
+                reset();
+                if (!input.value.trim()) {
+                    showError("Required");
+                } else if (iti.isValidNumber()) {
+                    validMsg.innerHTML = "Valid number: " + iti.getNumber();
+                    document.querySelector(phonecode).value = iti.getNumber();
+                    $(phonecode).val(iti.getNumber());
+                    validMsg.classList.remove("hide");
+                    console.log(iti.getNumber())
+                } else {
+                    const errorCode = iti.getValidationError();
+                    const msg = errorMap[errorCode] || "Invalid number";
+                    showError(msg);
+                }
+            });
+
+            // On change/keyup reset
+            input.addEventListener('change', reset);
+            input.addEventListener('keyup', reset);
+        }
+
+
         flatpickr(".dateformat", {
             dateFormat: "Y-m-d", // 2025-05-25 14:30
+            allowInput: true
         });
-
     </script>
+
+    <script src="{{ asset('assets/js/datatable.js') }}"></script>
     
 </body>
 

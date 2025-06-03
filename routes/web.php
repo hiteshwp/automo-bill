@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\GarageOwnerController;
+use App\Http\Controllers\VehiclesController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,16 +29,16 @@ Route::middleware(['auth'])->group(function () {
 
          // 🚀 Garage Owner Management (Super Admin Only)
          Route::group(['prefix' => 'garage-owners'], function () {
-            Route::get('list', [GarageOwnerController::class, 'index'])->name('garage-owners.index');
-            Route::post('data', [GarageOwnerController::class, 'getData'])->name('garage-owners.data'); // DataTable route
-            Route::post('store', [GarageOwnerController::class, 'store'])->name('garage-owners.store');
+            Route::get('list', [GarageOwnerController::class, 'index'])->name('admin.garage-owners.index');
+            Route::post('data', [GarageOwnerController::class, 'getData'])->name('admin.garage-owners.data'); // DataTable route
+            Route::post('store', [GarageOwnerController::class, 'store'])->name('admin.garage-owners.store');
             Route::post('view', [GarageOwnerController::class, 'view']);
             Route::post('editview', [GarageOwnerController::class, 'editview']);
             Route::post('update', [GarageOwnerController::class, 'update']);
             Route::delete('remove-details/{id}', [GarageOwnerController::class, 'removedetails'])->name('owner.removedetails');
-            Route::get('{id}/clients', [GarageOwnerController::class, 'clientListPage'])->name('garage.clients.page');
-            Route::get('{id}/clients/data', [GarageOwnerController::class, 'getClientData'])->name('garage.clients.data');
-            Route::get('client-details/{id}', [GarageOwnerController::class, 'clientdetails'])->name('client.clientdetails');
+            Route::get('{id}/clients', [GarageOwnerController::class, 'clientListPage'])->name('admin.garage.clients.page');
+            Route::get('{id}/clients/data', [GarageOwnerController::class, 'getClientData'])->name('admin.garage.clients.data');
+            Route::get('client-details/{id}', [GarageOwnerController::class, 'clientdetails'])->name('admin.client.clientdetails');
         });
 
          // 🚀 Admin Management (Super Admin Only)
@@ -59,10 +60,32 @@ Route::middleware(['auth'])->group(function () {
 
         // 🚀 Client Management (Garage Owner Only)
         Route::group(['prefix' => 'clients'], function () {
-            Route::get('list', [ClientsController::class, 'index'])->name('clients.index');
-            Route::post('data', [ClientsController::class, 'getClientsData'])->name('clients.data'); // DataTable route
-            Route::get('detail/{id}', [ClientsController::class, 'clientdetail'])->name('client.details');
+            Route::get('list', [ClientsController::class, 'index'])->name('garage-owner.clients.index');
+            Route::post('data', [ClientsController::class, 'getClientsData'])->name('garage-owner.clients.data'); // DataTable route
+            Route::get('detail/{id}', [ClientsController::class, 'clientdetail'])->name('garage-owner.client.details');
+            Route::post('store', [ClientsController::class, 'store'])->name('client.store');
+            Route::post('view', [ClientsController::class, 'view']);
+            Route::post('update', [ClientsController::class, 'update']);
+            Route::delete('remove-details/{id}', [ClientsController::class, 'removedetails'])->name('client.removedetails');
+
+            Route::get('{id}/vehicles', [VehiclesController::class, 'index'])->name('garage-owner.clients.vehicles.page');
+            Route::post('vehicles/data', [VehiclesController::class, 'getClientsVehicleData'])->name('garage-owner.clients.vehicles.data');
+            Route::post('vehicles/store', [VehiclesController::class, 'store'])->name('garage-owner.clients.vehicles.store');
+            Route::post('vehicles/view', [VehiclesController::class, 'view']);
+            Route::post('vehicles/update', [VehiclesController::class, 'update']);
+            Route::delete('vehicles/remove-details/{id}', [VehiclesController::class, 'removedetails'])->name('garage-owner.clients.vehicles.removedetails');
         });
+
+        // 🚀 Vehicle Management (Garage Owner Only)
+        // Route::group(['prefix' => 'vehicles'], function () {
+        //     Route::get('list', [ClientsController::class, 'index'])->name('garage-owner.vehicle.index');
+        //     Route::post('data', [ClientsController::class, 'getVehiclesData'])->name('garage-owner.vehicle.data'); // DataTable route
+        //     Route::get('detail/{id}', [ClientsController::class, 'vehicledetail'])->name('garage-owner.vehicle.details');
+        //     Route::post('store', [ClientsController::class, 'store'])->name('client.store');
+        //     Route::post('view', [ClientsController::class, 'view']);
+        //     Route::post('update', [ClientsController::class, 'update']);
+        //     Route::delete('remove-details/{id}', [ClientsController::class, 'removedetails'])->name('garage-owner.vehicle.removedetails');
+        // });
 
         Route::group(['prefix' => 'plans'], function () {
             Route::get('list', [PlansController::class, 'index'])->name('plans.index');

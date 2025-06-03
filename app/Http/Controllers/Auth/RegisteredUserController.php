@@ -31,6 +31,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        //echo "<pre>"; print_r($request->all()); die;
         $request->validate([
             'fullname' => 'required|string|max:255',
             'businessname' => 'required|string|max:255',
@@ -44,7 +45,9 @@ class RegisteredUserController extends Controller
             'city' => 'required|exists:tbl_cities,id',
             'zip' => 'required|string|max:10',
             'website' => 'nullable|url|max:255',
-            'usertype' => 'required|in:Super Admin,Garage Owner,User',
+            'usertype' => 'required|in:Super Admin,Garage Owner,User,Admin,Supplier,Accountant',
+            'phonecode' => 'required',
+            'isocode' => 'required',
         ]);
 
         $user = User::create([
@@ -52,6 +55,7 @@ class RegisteredUserController extends Controller
             'businessname' => $request->businessname,
             'mobilenumber' => $request->mobilenumber,
             'countrycode' => $request->phonecode,
+            'countryisocode' => $request->isocode,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'taxnumber' => $request->taxnumber,
@@ -61,7 +65,7 @@ class RegisteredUserController extends Controller
             'city_id' => $request->city,
             'zip' => $request->zip,
             'website' => $request->website,
-            'user_type' => $request->usaertype,
+            'user_type' => $request->usertype,
             'user_status' => "1",
         ]);
 

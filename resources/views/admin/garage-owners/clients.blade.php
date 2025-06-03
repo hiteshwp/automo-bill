@@ -8,7 +8,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="page-title-box p-0 d-sm-flex align-items-center justify-content-between">
-                            <h4 class="mb-sm-0 d-flex align-items-center gap-2"><a href="{{ route('garage-owners.index') }}" class="btn btn-soft-primary btn-icon shadow-none"><i class="ri-arrow-left-line"></i></a> Client - <span class="fs-14 fw-normal">({{ $garageOwners->name }})</span></h4>
+                            <h4 class="mb-sm-0 d-flex align-items-center gap-2"><a href="{{ route('admin.garage-owners.index') }}" class="btn btn-soft-primary btn-icon shadow-none"><i class="ri-arrow-left-line"></i></a> Client - <span class="fs-14 fw-normal">({{ $garageOwners->name }})</span></h4>
 
                             <div class="page-title-action-list d-flex gap-2">
                                 <div class="page-title-action-item">
@@ -30,7 +30,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-block table-responsive">
-                        <table id="garageOwnersClientTable" class="table table-hover table-bordered w-100" data-route="{{ route('garage.clients.data', ['id' => $garageOwners->id ]) }}" data-garageownerid = "{{ $garageOwners->user_id }}">
+                        <table id="garageOwnersClientTable" class="table table-hover table-bordered w-100" data-route="{{ route('admin.garage.clients.data', ['id' => $garageOwners->id ]) }}" data-garageownerid = "{{ $garageOwners->user_id }}">
                             <thead>
                                 <tr>
                                     <th>Sr No.</th>
