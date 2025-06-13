@@ -106,34 +106,108 @@
     </div>
 </div>
 
-<!-- removeNotificationModal -->
-<div id="removeNotificationModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="NotificationModalbtn-close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mt-2 text-center">
-                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                        <h4>Are you sure ?</h4>
-                        <p class="text-muted mx-4 mb-0">Are you sure you want to remove this Notification ?</p>
+<div class="offcanvas offcanvas-end offcanvas-width-50" tabindex="-1" id="sidebarUpdateClient" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasRightLabel">Update Client Informartion</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="offcanvasFormBlock">
+            <form class="form-fields-block needs-validation" id="frmgarageownerclientupdateinformation" method="post">
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="card-header pb-2 mb-3">
+                            <h4 class="card-title mb-0 flex-grow-1">Personal Information</h4>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientname">Name*</label>
+                            <input type="text" class="form-control" id="txtupdateclientname" name="txtupdateclientname" required placeholder="Enter your name" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientemail">Email*</label>
+                            <input type="email" class="form-control" id="txtupdateclientemail" name="txtupdateclientemail" required placeholder="Enter your email" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientmobilenumber">Mobile No*</label>
+                            <input class="form-control" id="txtupdateclientmobilenumber" name="txtupdateclientmobilenumber" required type="tel" value="" placeholder="Enter your mobile number" />
+                            <div id="error-msg-update" class="hide"></div>
+                            <div id="valid-msg-update" class="hide"></div>
+                            <button id="btn-update" style="display:none;">Validate</button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientlandlinenumber">Landline No</label>
+                            <input type="text" class="form-control" id="txtupdateclientlandlinenumber" name="txtupdateclientlandlinenumber" placeholder="Enter your landline number" />
+                        </div>
                     </div>
                 </div>
-                <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
-                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn w-sm btn-danger" id="delete-notification">Yes, Delete It!</button>
+                <div class="row mt-3">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="card-header pb-2 mb-3">
+                            <h4 class="card-title mb-0 flex-grow-1">Address Information</h4>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientcountry">Country*</label>
+                            <select class="form-select mb-3 drpcountry" aria-label="Default select example" name="txtupdateclientcountry" id="txtupdateclientcountry" required>
+                                <option value="" selected>Select Country</option>
+                                @foreach($countries as $country)
+                                <option value="{{ $country->id }}">
+                                    {{ $country->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>                    
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientstate">State*</label>
+                            <select class="form-select mb-3 drpstate" aria-label="Default select example" name="txtupdateclientstate" id="txtupdateclientstate" required>
+                                <option value="" selected>Select State</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientcity">Town/City*</label>
+                            <select class="form-select mb-3 drpcity" aria-label="Default select example" name="txtupdateclientcity" id="txtupdateclientcity" required>
+                                <option value="" selected>Select City</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateclientaddress">Address*</label>
+                            <textarea class="form-control resize-none" id="txtupdateclientaddress" name="txtupdateclientaddress" placeholder="Enter your address" required></textarea>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+                <div class="form-action-block">
+                    <div class="form-action-btn">
+                        <button type="submit" class="btn btn-primary" id="btnupdatelient">Update</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="offcanvas" aria-label="Close">Cancel</button>
+                        <input type="hidden" name="updateclientid" id="updateclientid" value=""/>
+                        <input type="hidden" name="updateclientphonecode" id="updateclientphonecode" value=""/>
+                        <input type="hidden" name="updateclientphoneicocode" id="updateclientphoneicocode" value=""/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- removeNotificationModal -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="removeNotificationModal" aria-labelledby="offcanvasRightLabel">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="removeClientNotificationModal" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
-        <h5 id="offcanvasRightLabel">Remove Garage Owner Details</h5>
+        <h5 id="offcanvasRightLabel">Remove Client User Details</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -146,9 +220,9 @@
             </div>
             <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
                 <form method="post">
-                    <input type="hidden" value="" id="txtdeleteownerid"/>
+                    <input type="hidden" value="" id="txtdeletegarageownerclientid"/>
                     <button type="button" class="btn w-sm btn-light" data-bs-dismiss="offcanvas">Close</button>
-                    <button type="button" class="btn w-sm btn-danger" id="delete-notification">Yes, Delete It!</button>
+                    <button type="button" class="btn w-sm btn-danger" id="delete-garage-owner-client-notification">Yes, Delete It!</button>
                 </form>
             </div>
         </div>

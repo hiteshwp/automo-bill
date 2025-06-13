@@ -4,11 +4,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class Vehicle extends Model
+class ProductModel extends Model
 {
     use SoftDeletes;
-    protected $table = 'tbl_vehicles';
-    protected $primaryKey = 'id'; // This is optional if your primary key is already `id`, but include it for clarity
+    protected $table = 'tbl_products';
+    protected $primaryKey = 'product_id'; // This is optional if your primary key is already `id`, but include it for clarity
 
     /**
      * The attributes that are mass assignable.
@@ -16,20 +16,18 @@ class Vehicle extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'id',
-        'customer_id',
-        'garage_id',
-        'vin',
-        'chassisno',
-        'number_plate',
-        'modelyear',
-        'modelname',
-        'modelbrand',
-        'lastservice',
+        'product_id',
+        'product_supplier_id',
+        'product_name',
+        'product_garage_owner_id',
+        'product_number',
+        'product_description',
+        'product_price',
+        'product_date',
         'created_at',
         'updated_at',
         'deleted_at',
-        'vehicle_status'
+        'product_status'
     ];
 
     /**

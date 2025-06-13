@@ -60,6 +60,7 @@ class ClientsController extends Controller
 
          $clients = User::where('garage_owner_id', $id)
                         ->where('user_type', 'User')
+                        ->whereNull('deleted_at')
                         ->leftJoin('tbl_countries', 'users.country_id', '=', 'tbl_countries.id')
                         ->select('users.*', 'tbl_countries.name as country_name')
                         ->orderBy('users.id', 'desc');

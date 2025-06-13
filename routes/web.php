@@ -8,6 +8,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\GarageOwnerController;
 use App\Http\Controllers\VehiclesController;
+use App\Http\Controllers\SearchClientController;
+use App\Http\Controllers\SearchVehicleController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +43,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{id}/clients', [GarageOwnerController::class, 'clientListPage'])->name('admin.garage.clients.page');
             Route::get('{id}/clients/data', [GarageOwnerController::class, 'getClientData'])->name('admin.garage.clients.data');
             Route::get('client-details/{id}', [GarageOwnerController::class, 'clientdetails'])->name('admin.client.clientdetails');
+            Route::post('client/editview', [GarageOwnerController::class, 'clienteditview']);
+            Route::post('client/update', [GarageOwnerController::class, 'clientupdate']);
+            Route::delete('client/remove-details/{id}', [GarageOwnerController::class, 'clientremovedetails'])->name('garageowner.client.removedetails');
         });
 
          // 🚀 Admin Management (Super Admin Only)
@@ -50,6 +57,13 @@ Route::middleware(['auth'])->group(function () {
             Route::post('editview', [AdminController::class, 'editview']);
             Route::post('update', [AdminController::class, 'update']);
             Route::delete('remove-details/{id}', [AdminController::class, 'removedetails'])->name('admin.removedetails');
+        });
+
+        // Search Client Management
+        Route::group(['prefix' => 'search'], function () {
+            Route::get('clients', [SearchClientController::class, 'searchClient'])->name('admin.searchclient.list');
+            Route::post('search/client/data', [SearchClientController::class, 'getSearchClientData'])->name('admin.searchclient.data');
+            Route::get('vehicles', [SearchVehicleController::class, 'searchVehicle'])->name('admin.searchVehicle.list');
         });
     });
 
@@ -76,6 +90,28 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('vehicles/remove-details/{id}', [VehiclesController::class, 'removedetails'])->name('garage-owner.clients.vehicles.removedetails');
         });
 
+        // 🚀 Supplier Management (Garage Owner Only)
+        Route::group(['prefix' => 'supplier'], function () {
+            Route::get('list', [SupplierController::class, 'index'])->name('garage-owner.suppliers.list');
+            Route::post('data', [SupplierController::class, 'getSupplierData'])->name('garage-owner.suppliers.data'); // DataTable route
+            Route::post('store', [SupplierController::class, 'store'])->name('garage-owner.suppliers.admin.store');
+            Route::post('view', [SupplierController::class, 'supplierView']);
+            Route::post('editview', [SupplierController::class, 'editview']);
+            Route::post('update', [SupplierController::class, 'update']);
+            //Route::delete('remove-details/{id}', [SupplierController::class, 'removedetails'])->name('garage-owner.suppliers.removedetails');
+        });
+
+        // 🚀 Products Management (Garage Owner Only)
+        Route::group(['prefix' => 'product'], function () {
+            Route::get('list', [ProductController::class, 'index'])->name('garage-owner.product.list');
+            Route::post('data', [ProductController::class, 'getProductData'])->name('garage-owner.product.data'); // DataTable route
+            Route::post('store', [ProductController::class, 'store'])->name('garage-owner.product.admin.store');
+            Route::post('view', [ProductController::class, 'supplierView']);
+            Route::post('editview', [ProductController::class, 'editview']);
+            Route::post('update', [ProductController::class, 'update']);
+            Route::delete('remove-details/{id}', [ProductController::class, 'removedetails'])->name('garage-owner.product.removedetails');
+        });
+
         // 🚀 Vehicle Management (Garage Owner Only)
         // Route::group(['prefix' => 'vehicles'], function () {
         //     Route::get('list', [ClientsController::class, 'index'])->name('garage-owner.vehicle.index');
@@ -86,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
         //     Route::post('update', [ClientsController::class, 'update']);
         //     Route::delete('remove-details/{id}', [ClientsController::class, 'removedetails'])->name('garage-owner.vehicle.removedetails');
         // });
+
 
         Route::group(['prefix' => 'plans'], function () {
             Route::get('list', [PlansController::class, 'index'])->name('plans.index');

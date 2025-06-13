@@ -324,10 +324,10 @@
                                                 <a href="{{ route('admin.garage-owners.index') }}" class="nav-link" data-key="t-garage-owners">Garage Owners</a>
                                             </li>
                                             <li class="nav-item">
-                                                <a href="#" class="nav-link" data-key="t-search-client">Search Client</a>
+                                                <a href="{{ route('admin.searchclient.list') }}" class="nav-link" data-key="t-search-client">Search Client</a>
                                             </li>
                                             <li class="nav-item">
-                                                <a href="#" class="nav-link" data-key="t-search-vehicle">Search Vehicle</a>
+                                                <a href="{{ route('admin.searchVehicle.list') }}" class="nav-link" data-key="t-search-vehicle">Search Vehicle</a>
                                             </li>
                                             <li class="nav-item">
                                                 <a href="#" class="nav-link" data-key="t-invoice-due">Invoice Due</a>
@@ -347,6 +347,41 @@
                                         </ul>
                                     </div>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-calendar-check-line"></i> <span data-key="t-booking">Booking</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-calculator-line"></i> <span data-key="t-estimates">Estimates</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-list-settings-line"></i> <span data-key="t-repair-orders">Repair Orders</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-box-3-line"></i> <span data-key="t-suppliers">Suppliers</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-book-2-line"></i> <span data-key="t-diarize">Diarize</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-customer-service-2-line"></i> <span data-key="t-contact-us">Contact Us</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-file-paper-line"></i> <span data-key="t-content">Content</span>
+                                    </a>
+                                </li>
                             @endif
 
                             @if(auth()->user()->user_type === 'Garage Owner')
@@ -360,6 +395,41 @@
                                         <i class="ri-group-line"></i> <span data-key="t-customers">Clients</span>
                                     </a>                                    
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-calendar-check-line"></i> <span data-key="t-booking">Booking</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-calculator-line"></i> <span data-key="t-estimates">Estimates</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-list-settings-line"></i> <span data-key="t-repair-orders">Repair Orders</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.suppliers.list') }}">
+                                        <i class="ri-box-3-line"></i> <span data-key="t-suppliers">Suppliers</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-book-2-line"></i> <span data-key="t-diarize">Diarize</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-customer-service-2-line"></i> <span data-key="t-contact-us">Contact Us</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-file-paper-line"></i> <span data-key="t-content">Content</span>
+                                    </a>
+                                </li>
                             @endif
 
                             @if(auth()->user()->user_type === 'User')
@@ -370,42 +440,6 @@
                                 </li>
                             @endif
                         @endauth
-                        
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-calendar-check-line"></i> <span data-key="t-booking">Booking</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-calculator-line"></i> <span data-key="t-estimates">Estimates</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-list-settings-line"></i> <span data-key="t-repair-orders">Repair Orders</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-box-3-line"></i> <span data-key="t-suppliers">Suppliers</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-book-2-line"></i> <span data-key="t-diarize">Diarize</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-customer-service-2-line"></i> <span data-key="t-contact-us">Contact Us</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#">
-                                <i class="ri-file-paper-line"></i> <span data-key="t-content">Content</span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
                 <!-- Sidebar -->
@@ -802,6 +836,9 @@
         //let iti;
         get_phone_code("#txtclientmobilenumber", "#btn-client", "#error-msg-client", "#valid-msg-client", "#newclientphonecode", "#newclientphoneicocode");
         get_phone_code("#txtupdateclientmobilenumber", "#btn-update", "#error-msg-update", "#valid-msg-update", "#updateclientphonecode", "#updateclientphoneicocode");
+
+        get_phone_code("#txtsuppliermobilenumber", "#btn-supplier", "#error-msg-supplier", "#valid-msg-supplier", "#newsupplierphonecode", "#newsupplierphoneicocode");
+        get_phone_code("#txtupdatesuppliermobilenumber", "#btn-supplier-update", "#error-msg-supplier-update", "#valid-msg-supplier-update", "#updatesupplierphonecode", "#updatesupplierphoneicocode");
 
         function get_phone_code(selector, btnId, errorId, validId, phonecode, isocode) {
             const input = document.querySelector(selector);
