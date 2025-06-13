@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Validator;
 
 class GarageOwnerController extends Controller
 {
@@ -35,7 +36,8 @@ class GarageOwnerController extends Controller
         ->selectSub(function ($query) {
             $query->from('users as u')
                 ->selectRaw('count(*)')
-                ->whereColumn('u.garage_owner_id', 'users.id');
+                ->whereColumn('u.garage_owner_id', 'users.id')
+                ->whereNull('deleted_at');
         }, 'garage_user_count')
         ->leftJoin('tbl_countries', 'users.country_id', '=', 'tbl_countries.id')
         ->addSelect('tbl_countries.name as country_name')
@@ -205,7 +207,10 @@ class GarageOwnerController extends Controller
         $garageOwners = User::where('id', $id)
                      ->where('user_type', 'Garage Owner')
                      ->firstOrFail();
-        return view('admin.garage-owners.clients', compact('garageOwners'));
+        $countries = Country::all();
+        $states = State::all();
+        $cities = City::all();
+        return view('admin.garage-owners.clients', compact('garageOwners', 'countries', 'states', 'cities'));
     }
 
     public function getClientData($id, Request $request)
@@ -247,8 +252,8 @@ class GarageOwnerController extends Controller
             })
             ->addColumn('action', fn($user) =>
                 '<a href="'.route('admin.client.clientdetails', $user->id).'" class="btn btn-soft-primary btn-border btn-icon shadow-none"><i class="ri-eye-line"></i></a>
-                <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></button>
-                <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Delete"><i class="ri-delete-bin-6-line"></i></button>'
+                <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none editviewadminclientdetails" title="Edit Client Details" data-bs-toggle="offcanvas" data-bs-target="#sidebarUpdateClient" aria-controls="offcanvasRight" data-id="'.$user->id.'"><i class="ri-edit-line"></i></button>
+                <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none removeAdminClientNotificationModal" title="Delete Client Details" data-bs-toggle="offcanvas" data-bs-target="#removeClientNotificationModal" aria-controls="offcanvasRight" data-id="'.$user->id.'"><i class="ri-delete-bin-6-line"></i></button>'
             )
             ->rawColumns(['status', 'action'])
             ->make(true);
@@ -266,4 +271,96 @@ class GarageOwnerController extends Controller
         return view('admin.garage-owners.clientdetails', compact('clientDetails'));
     }
 
+    public function clienteditview(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $data = $request->all(); // Get all input data
+        $clientData = User::where('user_type', 'user')->findOrFail($data['userId']);
+
+        $states = State::where("country_id", $clientData["country_id"])->get();
+        $cities = City::where("state_id", $clientData["state_id"])->get();
+
+        $client_data = array(
+            "id"                =>  $clientData["id"],
+            "name"              =>  $clientData["name"],
+            "email"             =>  $clientData["email"],
+            "countrycode"       =>  $clientData["countrycode"],
+            "countryisocode"    =>  $clientData["countryisocode"],
+            "mobilenumber"      =>  $clientData["mobilenumber"],
+            "landlinenumber"    =>  $clientData["landlinenumber"],
+            "address"           =>  $clientData["address"],
+            "country_id"        =>  $clientData["country_id"],
+            "state_id"          =>  $clientData["state_id"],
+            "city_id"           =>  $clientData["city_id"],
+            "states"            =>  $states,
+            "cities"            =>  $cities,
+        );
+        return response()->json($client_data);
+    }
+
+    public function clientupdate(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $user = User::find($request->updateclientid);
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Client not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'txtupdateclientname'             => 'required|string|max:100',
+            'txtupdateclientemail'            => 'required|email',
+            'txtupdateclientmobilenumber'     => 'required|string|max:15',
+            'txtupdateclientcountry'          => 'required|string|max:100',
+            'txtupdateclientstate'            => 'required|string|max:100',
+            'txtupdateclientcity'             => 'required|string|max:100',
+            'txtupdateclientaddress'          => 'required|string|max:255',
+            'updateclientphonecode'           => 'required|string|max:20',
+            'updateclientphoneicocode'        => 'required|string|max:20',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()]);
+        }
+
+        $user = User::find($request->updateclientid);
+        $user->name             = $request->txtupdateclientname;
+        $user->email            = $request->txtupdateclientemail;
+        $user->countrycode      = $request->updateclientphonecode;
+        $user->countryisocode   = $request->updateclientphoneicocode;
+        $user->mobilenumber     = $request->txtupdateclientmobilenumber;
+        $user->country_id       = $request->txtupdateclientcountry;
+        $user->state_id         = $request->txtupdateclientstate;
+        $user->city_id          = $request->txtupdateclientcity;
+        $user->address          = $request->txtupdateclientaddress;
+
+        if ($request->txtupdateclientlandlinenumber) {
+            $user->landlinenumber = $request->txtupdateclientlandlinenumber;
+        }        
+
+        $user->save();
+    
+        return response()->json(['status' => 'success', 'message' => 'Client updated successfully.']);
+    }
+
+    public function clientremovedetails(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $client = User::where('user_type', 'User')->find($request->id);
+        if (!$client) {
+            return response()->json(['status' => 'error', 'message' => 'Client not found'], 404);
+        }
+
+        $client->delete(); // now performs soft delete
+
+        return response()->json(['status' => 'success', 'message' => 'Client deleted successfully.']);
+    }
 }

@@ -348,6 +348,178 @@ $(document).ready(function() {
             pageLength: 10, // Default records per page
         });
     }
+
+    $(document).on('click', '.editviewadminclientdetails', function () {
+        const userId = $(this).data('id');
+        console.log(userId);
+        $.ajax({
+            url: baseUrl + '/garage-owners/client/editview',
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                userId: userId
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $("#sidebarUpdateClient").addClass("offcanvas-loader");
+            },
+            success: function (data) {
+                $("#sidebarUpdateClient").removeClass("offcanvas-loader");
+                // Populate the form fields
+                $('#txtupdateclientname').val(data.name);
+                $('#txtupdateclientemail').val(data.email);
+                $('#txtupdateclientmobilenumber').val(data.mobilenumber);
+                $('#txtupdateclientlandlinenumber').val(data.landlinenumber);
+                $('#txtupdateclientcountry').val(data.country_id);
+                $('#txtupdateclientaddress').val(data.address);
+                $('#updateclientid').val(data.id);
+                $('#txtupdateclientstate').html("");
+                $('#txtupdateclientcity').html("");
+                $('#txtupdateclientstate').append('<option value="">Select State</option>');
+                $('#txtupdateclientcity').append('<option value="">Select City</option>');
+                $.each(data.states, function(key, state) {
+                    $('#txtupdateclientstate').append(`<option value="${state.id}">${state.name}</option>`);
+                });
+
+                $.each(data.cities, function(key, city) {
+                    $('#txtupdateclientcity').append(`<option value="${city.id}">${city.name}</option>`);
+                });
+
+                $('#txtupdateclientstate').val(data.state_id);
+                $('#txtupdateclientcity').val(data.city_id);
+
+                 // ✅ Set flag and number correctly
+                const input = document.querySelector("#txtupdateclientmobilenumber");
+                const itiInstance = input._iti;
+                const IsoCode = data.countryisocode;     // e.g., 'dz'
+                const phone = data.mobilenumber;         // e.g., '5584694128'
+
+                if (itiInstance) {
+                    itiInstance.setCountry(IsoCode);     // sets flag
+                    input.value = phone;                 // sets number
+                }
+
+            },
+            error: function(xhr, error, thrown) {
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+
+    $('#frmgarageownerclientupdateinformation').parsley();
+    $('#frmgarageownerclientupdateinformation').on('submit', function (e) {
+        e.preventDefault();
+        if($('#frmgarageownerclientupdateinformation').parsley().isValid())
+        {
+            let form = $(this);
+            let formData = new FormData(this);
+        
+            $.ajax({
+                url: baseUrl + '/garage-owners/client/update',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnupdatelient").prop('disabled', true).text('Updating...');
+                },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        $("#btnupdatelient").prop('disabled', false).text('Update');
+                        toastr.success(res.message);
+                        $('#garageOwnersClientTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarUpdateClient').offcanvas('hide');
+                        $('#frmgarageownerclientupdateinformation').trigger("reset");
+                        $('#frmgarageownerclientupdateinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnupdatelient").prop('disabled', false).text('Update');
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            let input = $('#txtedit' + key.replace(/_/g, ''));
+                            input.addClass('is-invalid');
+                            input.after('<div class="invalid-feedback d-block">' + errors[key][0] + '</div>');
+                        }
+                    } else {
+                        toastr.error('Something went wrong.');
+                    }
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '.removeAdminClientNotificationModal', function () {
+        const userId = $(this).data('id');
+        $("#txtdeletegarageownerclientid").val(userId);
+    });
+
+    $(document).on('click', '#delete-garage-owner-client-notification', function () {
+        const userId = $("#txtdeletegarageownerclientid").val();
+        $.ajax({
+            url: baseUrl + '/garage-owners/client/remove-details/'+userId,
+            type: 'DELETE',
+            data: {
+                _token: csrfToken,
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $(this).prop('disabled', true).text('Deleting...');
+            },
+            success: function (res) {
+                toastr.success(res.message);
+                $(this).prop('disabled', false).text('Yes, Delete It!');
+                $('#removeClientNotificationModal').offcanvas('hide');
+                $('#garageOwnersClientTable').DataTable().ajax.reload(null, false);
+            },
+            error: function(xhr, error, thrown) {
+                $(this).prop('disabled', true).text('Yes, Delete It!');
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
     
     // Admin Section related details start
     let dataAdminRoute = $('#adminAdminListingTable').data('route');
@@ -1251,4 +1423,431 @@ $(document).ready(function() {
         });
     });
     // Garage Owner Client's Vehicle Detail end
+
+    // Search Client Data
+    let searchCLientDataRoute = $('#adminSearchClientTable').data('route');
+    if ($('#adminSearchClientTable').length) 
+    {
+        $('#adminSearchClientTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url:searchCLientDataRoute,
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                },
+                error: function(xhr, error, thrown) {
+                    if (xhr.status === 401) {
+                        alert("Session expired. Redirecting to login...");
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("DataTable load error:", xhr.responseText);
+                    }
+                }
+            },
+            stateSave: true,
+            columns: [
+                { data: 'id', name: 'users.id' },
+                { data: 'name', name: 'users.name' },
+                { data: 'email', name: 'users.email' },
+                { data: 'mobilenumber', name: 'users.mobilenumber' },
+                { data: 'country_name', name: 'users.country_name' },
+                { data: 'zip', name: 'users.zip' },
+                { data: 'user_status', name: 'users.user_status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            order: [[0, 'asc']], // Default sorting by ID
+            lengthMenu: [10, 25, 50, 100], // Records per page options
+            pageLength: 10, // Default records per page
+        });
+    }
+
+    // ------------------------------------------- //
+
+    // Manage Supplier Section
+    let datasSupplierRoute = $('#garageOwnersSupplierTable').data('route');
+    if ($('#garageOwnersSupplierTable').length) 
+    {
+        $('#garageOwnersSupplierTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url:datasSupplierRoute,
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                },
+                error: function(xhr, error, thrown) {
+                    if (xhr.status === 401) {
+                        alert("Session expired. Redirecting to login...");
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("DataTable load error:", xhr.responseText);
+                    }
+                }
+            },
+            stateSave: true,
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'name', name: 'name' },
+                { data: 'email', name: 'email' },
+                { data: 'businessname', name: 'businessname' },
+                { data: 'products', name: 'products' },
+                { data: 'status', name: 'status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            order: [[0, 'asc']], // Default sorting by ID
+            lengthMenu: [10, 25, 50, 100], // Records per page options
+            pageLength: 10, // Default records per page
+        });
+    }
+
+    $('#frmaddnewsupplierinformation').parsley();
+    $('#frmaddnewsupplierinformation').on('submit', function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        if($('#frmaddnewsupplierinformation').parsley().isValid())
+        {
+            let form = $(this);
+
+            $.ajax({
+                url: baseUrl + '/supplier/store',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnaddnewsupplier").prop('disabled', true).text('Saving...');
+                },
+                success: function (res) {
+                    $("#btnaddnewsupplier").prop('disabled', false).text('Save');
+                    if (res.status === 'success') 
+                    {
+                        toastr.success(res.message);
+                        $('#garageOwnersSupplierTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarAddSupplier').offcanvas('hide');
+                        // Reset form and Parsley validation
+                        $('#frmaddnewsupplierinformation').trigger("reset");
+                        $('#frmaddnewsupplierinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnaddnewsupplier").prop('disabled', false).text('Save');
+                    let res = xhr.responseJSON;
+
+                    if (res.status === 'error' && typeof res.message === 'object') {
+                        for (let field in res.message) {
+                            if (res.message.hasOwnProperty(field)) {
+                                toastr.error(res.message[field][0]); // Show the first error for each field
+                            }
+                        }
+                    } else {
+                        toastr.error('Something went wrong. Please try again.');
+                    }
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '.viewsupplierinfo', function () {
+        const supplierId = $(this).data('supplierid');
+        $.ajax({
+            url: baseUrl + '/supplier/view',
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                supplierId: supplierId
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $("#sidebarViewInformation").addClass("offcanvas-loader");
+            },
+            success: function (data) {
+                $("#sidebarViewInformation").removeClass("offcanvas-loader");
+                // Populate the form fields
+                $('#supplierfullname').text(data.name);
+                $('#supplieremail').text(data.email);
+                $('#suppliermobilenumber').text(data.mobilenumber);
+                $('#supplieraddress').text(data.address);
+            },
+            error: function(xhr, error, thrown) {
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+    
+    $(document).on('click', '.editviewsupplierdetails', function () {
+        const supplierId = $(this).data('supplierid');
+        $.ajax({
+            url: baseUrl + '/supplier/editview',
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                supplierId: supplierId
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $("#sidebarUpdateSupplier").addClass("offcanvas-loader");
+            },
+            success: function (data) {
+                $("#sidebarUpdateSupplier").removeClass("offcanvas-loader");
+                // Populate the form fields
+                $('#txtupdatesuppliername').val(data.name);
+                $('#txtupdatecompanyname').val(data.businessname);
+                $('#txtupdatesupplieremail').val(data.email);
+                $('#txtupdatesuppliermobilenumber').val(data.mobilenumber);
+                $('#txtupdatesupplierlandlinenumber').val(data.landlinenumber);
+                $('#updatesupplierphonecode').val(data.countrycode);
+                $('#updatesupplierid').val(data.id);
+                $('#updatesupplierphoneicocode').val(data.countryisocode);
+                $('#txtupdatesupplieraddress').val(data.address);
+                $('#txtupdatesuppliercountry').val(data.country_id);
+                $('#txtupdatesupplierstate').html("");
+                $('#txtupdatesuppliercity').html("");
+                $('#txtupdatesupplierstate').append('<option value="">Select State</option>');
+                $('#txtupdatesuppliercity').append('<option value="">Select City</option>');
+                $.each(data.states, function(key, state) {
+                    $('#txtupdatesupplierstate').append(`<option value="${state.id}">${state.name}</option>`);
+                });
+
+                $.each(data.cities, function(key, city) {
+                    $('#txtupdatesuppliercity').append(`<option value="${city.id}">${city.name}</option>`);
+                });
+
+                $('#txtupdatesupplierstate').val(data.state_id);
+                $('#txtupdatesuppliercity').val(data.city_id);
+
+                 // ✅ Set flag and number correctly
+                const input = document.querySelector("#txtupdatesuppliermobilenumber");
+                const itiInstance = input._iti;
+                const IsoCode = data.countryisocode;     // e.g., 'dz'
+                const phone = data.mobilenumber;         // e.g., '5584694128'
+
+                if (itiInstance) {
+                    itiInstance.setCountry(IsoCode);     // sets flag
+                    input.value = phone;                 // sets number
+                }
+
+            },
+            error: function(xhr, error, thrown) {
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
+
+    $('#frmsupplierupdateinformation').parsley();
+    $('#frmsupplierupdateinformation').on('submit', function (e) {
+        e.preventDefault();
+        if($('#frmsupplierupdateinformation').parsley().isValid())
+        {
+            let form = $(this);
+            let formData = new FormData(this);
+        
+            $.ajax({
+                url: baseUrl + '/supplier/update',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnupdatesupplier").prop('disabled', true).text('Updating...');
+                },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        $("#btnupdatesupplier").prop('disabled', false).text('Update');
+                        toastr.success(res.message);
+                        $('#garageOwnersSupplierTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarUpdateSupplier').offcanvas('hide');
+                        $('#frmsupplierupdateinformation').trigger("reset");
+                        $('#frmsupplierupdateinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnupdatesupplier").prop('disabled', false).text('Update');
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            let input = $('#txtedit' + key.replace(/_/g, ''));
+                            input.addClass('is-invalid');
+                            input.after('<div class="invalid-feedback d-block">' + errors[key][0] + '</div>');
+                        }
+                    } else {
+                        toastr.error('Something went wrong.');
+                    }
+                }
+            });
+        }
+    });
+    // End
+
+    // Manage Supplier Section
+    let dataProductRoute = $('#garageOwnersProductTable').data('route');
+    if ($('#garageOwnersProductTable').length) 
+    {
+        $('#garageOwnersProductTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url:dataProductRoute,
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                },
+                error: function(xhr, error, thrown) {
+                    if (xhr.status === 401) {
+                        alert("Session expired. Redirecting to login...");
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("DataTable load error:", xhr.responseText);
+                    }
+                }
+            },
+            stateSave: true,
+            columns: [
+                { data: 'product_id', name: 'product_id' },
+                { data: 'product_number', name: 'product_number' },
+                { data: 'product_name', name: 'product_name' },
+                { data: 'product_price', name: 'product_price' },
+                { data: 'supplier_name', name: 'supplier_name' },
+                { data: 'company_name', name: 'company_name' },
+                { data: 'status', name: 'status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            order: [[0, 'asc']], // Default sorting by ID
+            lengthMenu: [10, 25, 50, 100], // Records per page options
+            pageLength: 10, // Default records per page
+        });
+    }
+
+    $('#frmaddnewproductinformation').parsley();
+    $('#frmaddnewproductinformation').on('submit', function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        if($('#frmaddnewproductinformation').parsley().isValid())
+        {
+            let form = $(this);
+
+            $.ajax({
+                url: baseUrl + '/product/store',
+                method: 'POST',
+                data: formData,
+                contentType: false,    // Required for file upload
+                processData: false,    // Required for file upload
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function () {
+                    $("#btnaddnewproduct").prop('disabled', true).text('Saving...');
+                },
+                success: function (res) {
+                    $("#btnaddnewproduct").prop('disabled', false).text('Save');
+                    if (res.status === 'success') 
+                    {
+                        toastr.success(res.message);
+                        $('#garageOwnersProductTable').DataTable().ajax.reload(null, false);
+                        $('#sidebarAddProduct').offcanvas('hide');
+                        // Reset form and Parsley validation
+                        $('#frmaddnewproductinformation').trigger("reset");
+                        $('#frmaddnewproductinformation').parsley().reset();
+                    }
+                    else
+                    {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-right",
+                            "timeOut": "10000"
+                        };
+                        for (const key in res.message) 
+                        {
+                            if (res.message.hasOwnProperty(key)) 
+                            {
+                                toastr.error(res.message[key].toString());
+                            }
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $("#btnaddnewproduct").prop('disabled', false).text('Save');
+                    let res = xhr.responseJSON;
+
+                    if (res.status === 'error' && typeof res.message === 'object') {
+                        for (let field in res.message) {
+                            if (res.message.hasOwnProperty(field)) {
+                                toastr.error(res.message[field][0]); // Show the first error for each field
+                            }
+                        }
+                    } else {
+                        toastr.error('Something went wrong. Please try again.');
+                    }
+                }
+            });
+        }
+    });
+
 });
