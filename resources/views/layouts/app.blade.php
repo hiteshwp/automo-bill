@@ -39,6 +39,9 @@
 
         <!-- App Css-->
         <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
+
+        <!-- Custom Css-->
+        <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet" type="text/css" />
     </head>
 <body class="siteurl" data-url="{{ url('/') }}">
 
@@ -396,23 +399,33 @@
                                     </a>                                    
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="#">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.suppliers.list') }}">
+                                        <i class="ri-box-3-line"></i> <span data-key="t-suppliers">Suppliers</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.booking.list') }}">
                                         <i class="ri-calendar-check-line"></i> <span data-key="t-booking">Booking</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="#">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.estimate.list') }}">
                                         <i class="ri-calculator-line"></i> <span data-key="t-estimates">Estimates</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="#">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.repair-order.list') }}">
                                         <i class="ri-list-settings-line"></i> <span data-key="t-repair-orders">Repair Orders</span>
+                                    </a>
+                                </li>                                
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('garage-owner.invoice.list') }}">
+                                        <i class="ri-file-list-3-line"></i> <span data-key="t-invoices">Invoices</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="{{ route('garage-owner.suppliers.list') }}">
-                                        <i class="ri-box-3-line"></i> <span data-key="t-suppliers">Suppliers</span>
+                                    <a class="nav-link menu-link" href="#">
+                                        <i class="ri-hand-coin-line"></i> <span data-key="t-quick-payment">Quick Payment</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -797,6 +810,7 @@
 
     <script src="{{ asset('assets/libs/prismjs/prism.js') }}"></script>
     <script src="{{ asset('assets/js/pages/form-validation.init.js') }}"></script>
+    <!-- <script src="{{ asset('assets/js/pages/form-input-spin.init.js') }}"></script> -->
 
     <script src="{{ asset('assets/libs/pickr/pickr.min.js') }}"></script>
     <script src="{{ asset('assets/js/pages/form-pickers.init.js') }}"></script>
@@ -839,6 +853,9 @@
 
         get_phone_code("#txtsuppliermobilenumber", "#btn-supplier", "#error-msg-supplier", "#valid-msg-supplier", "#newsupplierphonecode", "#newsupplierphoneicocode");
         get_phone_code("#txtupdatesuppliermobilenumber", "#btn-supplier-update", "#error-msg-supplier-update", "#valid-msg-supplier-update", "#updatesupplierphonecode", "#updatesupplierphoneicocode");
+
+        get_phone_code("#newadminphone", "#btn-admin", "#error-msg-admin", "#valid-msg-admin", "#newadminphonecode", "#newadminphoneicocode");
+        get_phone_code("#updateadminphone", "#btn-admin-update", "#error-msg-admin-update", "#valid-msg-admin-update", "#updateadminphonecode", "#updateadminphoneicocode");
 
         function get_phone_code(selector, btnId, errorId, validId, phonecode, isocode) {
             const input = document.querySelector(selector);

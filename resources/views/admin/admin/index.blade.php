@@ -114,6 +114,9 @@
                         <div class="formgroup mb-3">
                             <label class="form-label" for="newadminphone">Mobile No*</label>
                             <input class="form-control" id="newadminphone" name="newadminphone" type="tel" required  placeholder="Enter your mobile number" />
+                            <div id="error-msg-admin" class="hide"></div>
+                            <div id="valid-msg-admin" class="hide"></div>
+                            <button id="btn-admin" style="display:none;">Validate</button>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-4">
@@ -138,7 +141,7 @@
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="newadmineditcountry">Country*</label>
-                            <select class="form-select mb-3" aria-label="Default select example" name="newadmineditcountry" id="newadmineditcountry" required>
+                            <select class="form-select mb-3 drpcountry" aria-label="Default select example" name="newadmineditcountry" id="newadmineditcountry" required>
                                 <option value="" selected>Select Country</option>
                                 @foreach($countries as $country)
                                 <option value="{{ $country->id }}">
@@ -151,26 +154,16 @@
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="newadmineditstate">State*</label>
-                            <select class="form-select mb-3" aria-label="Default select example" name="newadmineditstate" id="newadmineditstate" required>
+                            <select class="form-select mb-3 drpstate" aria-label="Default select example" name="newadmineditstate" id="newadmineditstate" required>
                                 <option value="" selected>Select State</option>
-                                @foreach($states as $statelist)
-                                <option value="{{ $statelist->id }}">
-                                    {{ $statelist->name }}
-                                </option>
-                                @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="newadmineditcity">Town/City*</label>
-                            <select class="form-select mb-3" aria-label="Default select example" name="newadmineditcity" id="newadmineditcity" required>
-                                <option value="" selected>Select State</option>
-                                @foreach($cities as $citieslist)
-                                <option value="{{ $citieslist->id }}">
-                                    {{ $citieslist->name }}
-                                </option>
-                                @endforeach
+                            <select class="form-select mb-3 drpcity" aria-label="Default select example" name="newadmineditcity" id="newadmineditcity" required>
+                                <option value="" selected>Select City</option>
                             </select>
                         </div>
                     </div>
@@ -185,6 +178,8 @@
                     <div class="form-action-btn">
                         <button type="submit" class="btn btn-primary" id="btnstorenewadmininfo">Save</button>
                         <button type="button" class="btn btn-danger" data-bs-dismiss="offcanvas">Cancel</button>
+                        <input type="hidden" name="newadminphonecode" id="newadminphonecode" value="1"/>
+                        <input type="hidden" name="newadminphoneicocode" id="newadminphoneicocode" value="us"/>
                     </div>
                 </div>
             </form>
@@ -245,6 +240,9 @@
                         <div class="formgroup mb-3">
                             <label class="form-label" for="updateadminphone">Mobile No*</label>
                             <input class="form-control" id="updateadminphone" name="updateadminphone" type="tel" required  placeholder="Enter your mobile number" />
+                            <div id="error-msg-admin-update" class="hide"></div>
+                            <div id="valid-msg-admin-update" class="hide"></div>
+                            <button id="btn-admin-update" style="display:none;">Validate</button>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-4">
@@ -269,7 +267,7 @@
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="updateadmineditcountry">Country*</label>
-                            <select class="form-select mb-3" aria-label="Default select example" name="updateadmineditcountry" id="updateadmineditcountry" required>
+                            <select class="form-select mb-3 drpcountry" aria-label="Default select example" name="updateadmineditcountry" id="updateadmineditcountry" required>
                                 <option value="" selected>Select Country</option>
                                 @foreach($countries as $country)
                                 <option value="{{ $country->id }}">
@@ -282,26 +280,16 @@
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="updateadmineditstate">State*</label>
-                            <select class="form-select mb-3" aria-label="Default select example" name="updateadmineditstate" id="updateadmineditstate" required>
+                            <select class="form-select mb-3 drpstate" aria-label="Default select example" name="updateadmineditstate" id="updateadmineditstate" required>
                                 <option value="" selected>Select State</option>
-                                @foreach($states as $statelist)
-                                <option value="{{ $statelist->id }}">
-                                    {{ $statelist->name }}
-                                </option>
-                                @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="updateadmineditcity">Town/City*</label>
-                            <select class="form-select mb-3" aria-label="Default select example" name="updateadmineditcity" id="updateadmineditcity" required>
+                            <select class="form-select mb-3 drpcity" aria-label="Default select example" name="updateadmineditcity" id="updateadmineditcity" required>
                                 <option value="" selected>Select State</option>
-                                @foreach($cities as $citieslist)
-                                <option value="{{ $citieslist->id }}">
-                                    {{ $citieslist->name }}
-                                </option>
-                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -317,6 +305,8 @@
                         <button type="submit" class="btn btn-primary" id="btnupdateadmininfo">Update</button>
                         <button type="button" class="btn btn-danger" data-bs-dismiss="offcanvas">Cancel</button>
                         <input type="hidden" name="updateadminid" id="updateadminid" value=""/>
+                        <input type="hidden" name="updateadminphonecode" id="updateadminphonecode" value="1"/>
+                        <input type="hidden" name="updateadminphoneicocode" id="updateadminphoneicocode" value="us"/>
                     </div>
                 </div>
             </form>
@@ -333,7 +323,7 @@
     <div class="offcanvas-body">
         <div class="viewInformationBlock">
             <div class="garage-owner-img mb-3 d-flex justify-content-center">
-                <img src="assets/images/users/avatar-1.jpg" alt="" class="avatar-lg radius-100" id="ownerprofileimage">
+                <img src="{{ asset('assets/images/users/avatar-1.jpg') }}" alt="" class="avatar-lg radius-100" id="ownerprofileimage">
             </div>
             <div class="table-responsive table-card bg-primary-subtle border-primary">
                 <table class="table mb-0">

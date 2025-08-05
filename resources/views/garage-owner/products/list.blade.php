@@ -70,12 +70,12 @@
         <div class="offcanvasFormBlock">
             <form class="form-fields-block needs-validation" id="frmaddnewproductinformation" method="post">
                 <div class="row">
-                    <div class="col-12 col-md-12 col-lg-12">
+                    <!-- <div class="col-12 col-md-12 col-lg-12">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="txtproductnumber">Product Number*</label>
                             <input type="text" class="form-control" id="txtproductnumber" name="txtproductnumber" required placeholder="Enter product number" />
                         </div>
-                    </div>
+                    </div> -->
                     <div class="col-12 col-md-12 col-lg-12">
                         <div class="formgroup mb-3">
                             <label class="form-label" for="txtproductname">Product Name*</label>
@@ -115,6 +115,89 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarEditProduct" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasRightLabel">Update Product</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="offcanvasFormBlock">
+            <form class="form-fields-block needs-validation" id="frmupdateproductinformation" method="post">
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateproductnumber">Product Number*</label>
+                            <input type="text" class="form-control" id="txtupdateproductnumber" name="txtupdateproductnumber" required disabled placeholder="Enter product number" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateproductname">Product Name*</label>
+                            <input type="text" class="form-control" id="txtupdateproductname" name="txtupdateproductname" required placeholder="Enter product name" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateprice">Price ($)*</label>
+                            <input type="text" class="form-control" id="txtupdateprice" name="txtupdateprice" required placeholder="Enter price($)" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdateproductdate">Product Date*</label>
+                            <input type="text" class="form-control dateformat" id="txtupdateproductdate" name="txtupdateproductdate" required data-provider="flatpickr" data-date-format="d.m.y" placeholder="Select date" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="formgroup mb-3">
+                            <label class="form-label" for="txtupdatesupplier">Supplier</label>
+                            <select class="form-select" required name="txtupdatesupplier" id="txtupdatesupplier" aria-label="Default select example">
+                                <option value="">Select Supplier</option>
+                                @foreach($supplier as $supplierlist)
+                                <option value="{{ $supplierlist->id }}">
+                                    {{ $supplierlist->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-action-block">
+                    <div class="form-action-btn">
+                        <button type="submit" class="btn btn-primary" id="btnupdateproduct">Submit</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="offcanvas" aria-label="Close">Cancel</button>
+                        <input type="hidden" name="txtupdateproductid" id="txtupdateproductid" value=""/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="removeProductNotificationModal" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasRightLabel">Archive Product Details</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="viewInformationBlock">
+            <div class="mt-2 text-center">
+                <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                    <h4>Are you sure ?</h4>
+                    <p class="text-muted mx-4 mb-0">Are you sure you want to Archive this Details ?</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                <form method="post">
+                    <input type="hidden" value="" id="txtarchiveproducttid"/>
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="offcanvas">Close</button>
+                    <button type="button" class="btn w-sm btn-danger" id="archive-productt-notification">Yes, Archive It!</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

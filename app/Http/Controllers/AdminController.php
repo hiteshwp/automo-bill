@@ -116,11 +116,13 @@ class AdminController extends Controller
             'newadminemail'             => 'required|email|unique:users,email',
             'newadminpassword'          => 'required|min:6',
             'newadminconfirmpassword'   => 'required|min:6',
-            'newadminphone'             => 'required|digits_between:10,11',
+            'newadminphone'             => 'required',
             'newadmineditcountry'       => 'required|string|max:100',
             'newadmineditstate'         => 'required|string|max:100',
             'newadmineditcity'          => 'required|string|max:100',
             'newadminaddress'           => 'required|string|max:255',
+            'newadminphonecode'         => 'required|string|max:255',
+            'newadminphoneicocode'      => 'required|string|max:255',
             'filepond'                  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
     
@@ -129,16 +131,18 @@ class AdminController extends Controller
         }
 
         $user = new User();
-        $user->name         = $request->newadminfullname;
-        $user->email        = $request->newadminemail;
-        $user->user_type    = "Admin";
-        $user->password     = Hash::make($request->newadminpassword);
-        $user->mobilenumber = $request->newadminphone;
-        $user->country_id   = $request->newadmineditcountry;
-        $user->state_id     = $request->newadmineditstate;
-        $user->city_id      = $request->newadmineditcity;
-        $user->address      = $request->newadminaddress;
-        $user->user_status  = "1";
+        $user->name             = $request->newadminfullname;
+        $user->email            = $request->newadminemail;
+        $user->user_type        = "Admin";
+        $user->password         = Hash::make($request->newadminpassword);
+        $user->mobilenumber     = $request->newadminphone;
+        $user->country_id       = $request->newadmineditcountry;
+        $user->state_id         = $request->newadmineditstate;
+        $user->city_id          = $request->newadmineditcity;
+        $user->address          = $request->newadminaddress;
+        $user->countryisocode   = $request->newadminphoneicocode;
+        $user->countrycode      = $request->newadminphonecode;
+        $user->user_status      = "1";
 
         if ($request->newadminjoindate) {
             $user->user_join_date = $request->newadminjoindate;
@@ -216,6 +220,8 @@ class AdminController extends Controller
 
         $data = $request->all(); // Get all input data
         $adminUser = User::where("user_type", "Admin")->findOrFail($data['userId']);
+        $states = State::where("country_id", $adminUser["country_id"])->get();
+        $cities = City::where("state_id", $adminUser["state_id"])->get();
 
         $profilepic = asset('assets/images/users/avatar-1.jpg');
         if($adminUser["user_profile_pic"] != "")
@@ -232,8 +238,12 @@ class AdminController extends Controller
             "country_id"        =>  $adminUser["country_id"],
             "state_id"          =>  $adminUser["state_id"],
             "city_id"           =>  $adminUser["city_id"],
+            "countrycode"       =>  $adminUser["countrycode"],
+            "countryisocode"    =>  $adminUser["countryisocode"],
             "user_join_date"    =>  $adminUser["user_join_date"],
             "user_left_date"    =>  $adminUser["user_left_date"],
+            "states"            =>  $states,
+            "cities"            =>  $cities,
             "user_profile_pic"  =>  $profilepic,
         );
         return response()->json($owner_data);
@@ -254,11 +264,13 @@ class AdminController extends Controller
             'updateadminfullname'           => 'required|string|max:100',
             'updateadminpassword'           => 'nullable|min:6',
             'updateadminconfirmpassword'    => 'nullable|min:6',
-            'updateadminphone'              => 'required|digits_between:10,11',
+            'updateadminphone'              => 'required',
             'updateadmineditcountry'        => 'required|string|max:100',
             'updateadmineditstate'          => 'required|string|max:100',
             'updateadmineditcity'           => 'required|string|max:100',
             'updateadminaddress'            => 'required|string|max:255',
+            'updateadminphonecode'          => 'required|string|max:20',
+            'updateadminphoneicocode'       => 'required|string|max:20',
             'editfilepond'                  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -266,12 +278,14 @@ class AdminController extends Controller
             return response()->json(['status' => 'error', 'message' => $validator->errors()]);
         }
 
-        $adminUser->name         = $request->updateadminfullname;
-        $adminUser->mobilenumber = $request->updateadminphone;
-        $adminUser->country_id   = $request->updateadmineditcountry;
-        $adminUser->state_id     = $request->updateadmineditstate;
-        $adminUser->city_id      = $request->updateadmineditcity;
-        $adminUser->address      = $request->updateadminaddress;
+        $adminUser->name            = $request->updateadminfullname;
+        $adminUser->mobilenumber    = $request->updateadminphone;
+        $adminUser->country_id      = $request->updateadmineditcountry;
+        $adminUser->state_id        = $request->updateadmineditstate;
+        $adminUser->city_id         = $request->updateadmineditcity;
+        $adminUser->address         = $request->updateadminaddress;
+        $adminUser->countryisocode  = $request->updateadminphoneicocode;
+        $adminUser->countrycode     = $request->updateadminphonecode;
 
         if ($request->updateadminjoindate) {
             $adminUser->user_join_date = $request->updateadminjoindate;
@@ -290,8 +304,6 @@ class AdminController extends Controller
             $filename = date("YmdHis") . '-' . $file->getClientOriginalName();
             $file->move(public_path('uploads/profiles/'), $filename);
             $adminUser->user_profile_pic = $filename;
-        } else {
-            $adminUser->user_profile_pic = 'avtar.png';
         }
     
         $adminUser->save();
