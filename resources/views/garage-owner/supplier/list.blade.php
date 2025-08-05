@@ -188,8 +188,8 @@
                     <div class="form-action-btn">
                         <button type="submit" class="btn btn-primary" id="btnaddnewsupplier">Submit</button>
                         <button type="button" class="btn btn-danger" data-bs-dismiss="offcanvas" aria-label="Close">Cancel</button>
-                        <input type="hidden" name="newsupplierphonecode" id="newsupplierphonecode" value=""/>
-                        <input type="hidden" name="newsupplierphoneicocode" id="newsupplierphoneicocode" value=""/>
+                        <input type="hidden" name="newsupplierphonecode" id="newsupplierphonecode" value="1"/>
+                        <input type="hidden" name="newsupplierphoneicocode" id="newsupplierphoneicocode" value="us"/>
                     </div>
                 </div>
             </form>
@@ -299,136 +299,29 @@
     </div>
 </div>
 
-<!-- Add supplier form offcanvas -->
-<!-- <div class="offcanvas offcanvas-end offcanvas-width-50" tabindex="-1" id="sidebarAddSupplier" aria-labelledby="offcanvasRightLabel">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="removeSupplierNotificationModal" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
-        <h5 id="offcanvasRightLabel">Add New Supplier Detail</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="offcanvasFormBlock">
-            <form class="form-fields-block needs-validation">
-                <div class="row">
-                    <div class="col-12 col-md-12 col-lg-12">
-                        <div class="card-header pb-2 mb-3">
-                            <h4 class="card-title mb-0 flex-grow-1">Personal Information</h4>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Name*</label>
-                            <input type="text" class="form-control" id="validationCustom05" required placeholder="Enter your name" />
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Company Name*</label>
-                            <input type="text" class="form-control" id="validationCustom05" required placeholder="Enter company name" />
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Email*</label>
-                            <input type="text" class="form-control" id="validationCustom05" required placeholder="Enter your email" />
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Mobile No*</label>
-                            <input class="form-control" id="phone" name="phone" type="tel" value="" placeholder="Enter your mobile number" />
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-12 col-lg-12">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Landline No</label>
-                            <input type="text" class="form-control" id="validationCustom05" required placeholder="Enter your landline number" />
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12 col-md-12 col-lg-12">
-                        <div class="card-header pb-2 mb-3">
-                            <h4 class="card-title mb-0 flex-grow-1">Address Information</h4>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Country*</label>
-                            <select class="form-select mb-3" aria-label="Default select example">
-                                <option selected>Select Country</option>
-                                <option value="1">Canada</option>
-                                <option value="2">United States</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Town/City</label>
-                            <select class="form-select mb-3" aria-label="Default select example">
-                                <option selected>Select City</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">State</label>
-                            <select class="form-select mb-3" aria-label="Default select example">
-                                <option selected>Select State</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-12 col-lg-12">
-                        <div class="formgroup mb-3">
-                            <label class="form-label" for="validationCustom05">Address*</label>
-                            <textarea class="form-control resize-none" id="validationCustom05" placeholder="Enter your address"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-action-block">
-                    <div class="form-action-btn">
-                        <button type="button" class="btn btn-primary">Submit</button>
-                        <button type="button" class="btn btn-danger">Cancel</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div> -->
-
-<!-- View supplier details offcanvas -->
-<!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarViewInformation" aria-labelledby="offcanvasRightLabel">
-    <div class="offcanvas-header">
-        <h5 id="offcanvasRightLabel">View Supplier</h5>
+        <h5 id="offcanvasRightLabel">Archive Supplier Details</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         <div class="viewInformationBlock">
-            <div class="table-responsive table-card bg-primary-subtle border-primary">
-                <table class="table mb-0">
-                    <tbody>
-                        <tr>
-                            <td class="fw-medium">Name</td>
-                            <td>Chirag Kanjariya</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-medium">Email</td>
-                            <td>chiragkanjariya@mailinator.com</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-medium">Mobile No</td>
-                            <td>7576886103</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-medium">Address</td>
-                            <td>located at 201, Amilaxmi, Lad society road, Vastrapur, Carman, Manitoba, Canada.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                end table
+            <div class="mt-2 text-center">
+                <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                    <h4>Are you sure ?</h4>
+                    <p class="text-muted mx-4 mb-0">Are you sure you want to Archive this Details ?</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                <form method="post">
+                    <input type="hidden" value="" id="txtarchivesuppliertid"/>
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="offcanvas">Close</button>
+                    <button type="button" class="btn w-sm btn-danger" id="archive-supplier-notification">Yes, Archive It!</button>
+                </form>
             </div>
         </div>
     </div>
-</div> -->
+</div>
 
 <!-- right offcanvas -->
 @include('layouts.explore')

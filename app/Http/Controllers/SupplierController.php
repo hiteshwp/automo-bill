@@ -58,29 +58,33 @@ class SupplierController extends Controller
 
          $id = $user->id;
 
-        $supplier = User::select('users.*', 'tbl_countries.name as country_name')
-                        ->leftJoin('tbl_countries', 'users.country_id', '=', 'tbl_countries.id')
-                        ->where('users.garage_owner_id', $id)
-                        ->where('users.user_type', 'Supplier')
-                        ->whereNull('users.deleted_at')
-                        ->orderBy('users.id', 'desc');
+        $supplier = User::select('users.*')
+                        ->selectRaw('(SELECT GROUP_CONCAT(product_name SEPARATOR ", ") 
+                                    FROM tbl_products 
+                                    WHERE tbl_products.product_supplier_id = users.id 
+                                    AND tbl_products.product_garage_owner_id = '.$id.'
+                                    AND tbl_products.deleted_at IS NULL) as product_names')
+                        ->where('garage_owner_id', $id)
+                        ->where('user_type', 'Supplier')
+                        ->whereNull('deleted_at')
+                        ->orderBy('id', 'desc');
 
         return DataTables::of($supplier)
             ->filter(function ($query) use ($request) {
                 if (!empty($request->search['value'])) {
                     $search = $request->search['value'];
                     $query->where(function ($q) use ($search) {
-                        $q->where('users.name', 'like', "%{$search}%")
-                        ->orWhere('users.email', 'like', "%{$search}%")
-                        ->orWhere('tbl_countries.name', 'like', "%{$search}%")
-                        ->orWhere('users.businessname', 'like', "%{$search}%");
+                        $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('product_names', 'like', "%{$search}%")
+                        ->orWhere('businessname', 'like', "%{$search}%");
                     });
                 }
             })
             ->addColumn('name', fn($supplier) => $supplier->name)
             ->addColumn('email', fn($supplier) => $supplier->email)
             ->addColumn('businessname', fn($supplier) => $supplier->businessname)
-            ->addColumn('products', fn($supplier) => $supplier->businessname)
+            ->addColumn('product_names', fn($supplier) => $supplier->product_names)
             ->addColumn('status', function ($supplier) {
                 if( $supplier->user_status == "1" )
                 {
@@ -95,7 +99,7 @@ class SupplierController extends Controller
                 '<a href="#" title="View Supplier" class="btn btn-soft-primary btn-border btn-icon shadow-none viewsupplierinfo" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewInformation" aria-controls="offcanvasRight" data-supplierid="'.$supplier->id.'"><i class="ri-eye-line"></i></a>
                 <a href="#" title="Edit Supplier" class="btn btn-soft-success btn-border btn-icon shadow-none editviewsupplierdetails" data-bs-toggle="offcanvas" data-bs-target="#sidebarUpdateSupplier" aria-controls="offcanvasRight" data-supplierid="'.$supplier->id.'"><i class="ri-edit-line"></i></a>
                 <button type="button" class="btn btn-soft-secondary btn-border btn-icon shadow-none" title="Reply/Email/Part Order"><i class="ri-reply-line"></i></button>
-                <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>'
+                <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none removesupplierdetail" title="Archive" data-bs-toggle="offcanvas" data-bs-target="#removeSupplierNotificationModal" aria-controls="offcanvasRight" data-supplierid="'.$supplier->id.'"><i class="ri-archive-2-line"></i></button>'
             )
             ->rawColumns(['status', 'action'])
             ->make(true);
@@ -281,5 +285,27 @@ class SupplierController extends Controller
         $supplier->save();
     
         return response()->json(['status' => 'success', 'message' => 'Supplier detail updated successfully.']);
+    }
+
+    public function removedetails(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $garageOwner = Auth::user();
+
+        if ($garageOwner->user_type !== 'Garage Owner') {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $supplier = User::where('garage_owner_id', $garageOwner->id)->find($request->id);
+        if (!$supplier) {
+            return response()->json(['status' => 'error', 'message' => 'Supplier not found'], 404);
+        }
+
+        $supplier->delete(); // now performs soft delete
+
+        return response()->json(['status' => 'success', 'message' => 'Supplier archived successfully.']);
     }
 }

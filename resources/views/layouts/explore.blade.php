@@ -55,10 +55,10 @@
                                     <a href="{{ route('garage-owner.product.list') }}" class="nav-link">Product</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">Purchase</a>
+                                    <a href="{{ route('garage-owner.purchase.list') }}" class="nav-link">Purchase</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">Stock</a>
+                                    <a href="{{ route('garage-owner.stock.list') }}" class="nav-link">Stock</a>
                                 </li>
                             </ul>
                         </div>

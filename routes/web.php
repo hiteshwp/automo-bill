@@ -2,16 +2,22 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClientsController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\GarageOwnerController;
+use App\Http\Controllers\RepairOrderController;
 use App\Http\Controllers\VehiclesController;
 use App\Http\Controllers\SearchClientController;
 use App\Http\Controllers\SearchVehicleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\StockController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\EstimateController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -98,7 +104,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('view', [SupplierController::class, 'supplierView']);
             Route::post('editview', [SupplierController::class, 'editview']);
             Route::post('update', [SupplierController::class, 'update']);
-            //Route::delete('remove-details/{id}', [SupplierController::class, 'removedetails'])->name('garage-owner.suppliers.removedetails');
+            Route::delete('remove-details/{id}', [SupplierController::class, 'removedetails'])->name('garage-owner.suppliers.removedetails');
         });
 
         // 🚀 Products Management (Garage Owner Only)
@@ -106,10 +112,65 @@ Route::middleware(['auth'])->group(function () {
             Route::get('list', [ProductController::class, 'index'])->name('garage-owner.product.list');
             Route::post('data', [ProductController::class, 'getProductData'])->name('garage-owner.product.data'); // DataTable route
             Route::post('store', [ProductController::class, 'store'])->name('garage-owner.product.admin.store');
-            Route::post('view', [ProductController::class, 'supplierView']);
             Route::post('editview', [ProductController::class, 'editview']);
             Route::post('update', [ProductController::class, 'update']);
             Route::delete('remove-details/{id}', [ProductController::class, 'removedetails'])->name('garage-owner.product.removedetails');
+        });
+
+        // 🚀 Purchase Management (Garage Owner Only)
+        Route::group(['prefix' => 'purchase'], function () {
+            Route::get('list', [PurchaseController::class, 'index'])->name('garage-owner.purchase.list');
+            Route::post('data', [PurchaseController::class, 'getPurchaseData'])->name('garage-owner.purchase.data'); // DataTable route
+            Route::post('getsupplierdetail', [PurchaseController::class, 'getsupplierdetail']);
+            Route::post('getproductdetail', [PurchaseController::class, 'getproductdetail']);
+            Route::post('store', [PurchaseController::class, 'store'])->name('garage-owner.purchase.admin.store');
+            Route::post('getviewpurchasedetails', [PurchaseController::class, 'getViewPurchaseDetails']);
+            Route::post('editview', [PurchaseController::class, 'editview']);
+            Route::post('update', [PurchaseController::class, 'update']);
+            Route::delete('remove-details/{id}', [PurchaseController::class, 'removedetails'])->name('garage-owner.purchase.removedetails');
+        });
+
+        // 🚀 Stock Management (Garage Owner Only)
+        Route::group(['prefix' => 'stock'], function () {
+            Route::get('list', [StockController::class, 'index'])->name('garage-owner.stock.list');
+            Route::post('data', [StockController::class, 'getStockData'])->name('garage-owner.stock.data'); // DataTable route
+        });
+
+        // 🚀 Booking Management (Garage Owner Only)
+        Route::group(['prefix' => 'booking'], function () {
+            Route::get('list', [BookingController::class, 'index'])->name('garage-owner.booking.list');
+            Route::post('data', [BookingController::class, 'getBookingData'])->name('garage-owner.booking.data'); // DataTable route
+            Route::post('getuserdetail', [BookingController::class, 'getUserDetail']);
+            Route::post('store', [BookingController::class, 'store'])->name('garage-owner.booking.store');
+            Route::post('getviewbookingdetails', [BookingController::class, 'getViewBookingDetails']);
+            Route::post('update', [BookingController::class, 'update']);
+            Route::delete('remove-details/{id}', [BookingController::class, 'removedetails'])->name('garage-owner.booking.removedetails');
+            Route::delete('convert-normal-booking/{id}', [BookingController::class, 'convertdetails'])->name('garage-owner.booking.convertdetails');
+        });
+
+        // 🚀 Estimate Management (Garage Owner Only)
+        Route::group(['prefix' => 'estimate'], function () {
+            Route::get('new/booking/{id}', action: [EstimateController::class, 'index'])->name('garage-owner.estimate.new');
+            Route::post('store', [EstimateController::class, 'store'])->name('garage-owner.estimate.store');
+            Route::get('list', [EstimateController::class, 'list'])->name('garage-owner.estimate.list');
+            Route::post('data', [EstimateController::class, 'getEstimateData'])->name('garage-owner.estimate.data'); // DataTable route
+        });
+
+        // 🚀 Repair Order Management (Garage Owner Only)
+        Route::group(['prefix' => 'repair-order'], function () {
+            Route::get('new/estimate/{id}', action: [RepairOrderController::class, 'index'])->name('garage-owner.repair-order.new');
+            Route::post('store', [RepairOrderController::class, 'store'])->name('garage-owner.repair-order.store');
+            Route::get('list', [RepairOrderController::class, 'list'])->name('garage-owner.repair-order.list');
+            Route::post('data', [RepairOrderController::class, 'getRepairOrderData'])->name('garage-owner.repair-order.data'); // DataTable route
+        });
+
+        // 🚀 Invoice Management (Garage Owner Only)
+        Route::group(['prefix' => 'invoice'], function () {
+            Route::get('new/repair-order/{id}', action: [InvoiceController::class, 'index'])->name('garage-owner.invoice.new');
+            Route::post('store', [InvoiceController::class, 'store'])->name('garage-owner.invoice.store');
+            Route::get('list', [InvoiceController::class, 'list'])->name('garage-owner.invoice.list');
+            Route::post('data', [InvoiceController::class, 'getInvoiceData'])->name('garage-owner.invoice.data'); // DataTable route
+            Route::post('getviewinvoicedetails', [InvoiceController::class, 'getViewInvoiceDetails']);
         });
 
         // 🚀 Vehicle Management (Garage Owner Only)
