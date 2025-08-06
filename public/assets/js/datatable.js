@@ -3945,6 +3945,32 @@ $(document).ready(function() {
             });
         });
 
+        $('#printBtn').click(function () {
+            var content = $('#printinvoicedata').html(); // get modal content
+
+            var printWindow = window.open();
+            printWindow.document.write('<html><head><title>Print Invoice</title>');
+
+            // Optional: Copy Bootstrap CSS from current page (if needed)
+            printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">');
+
+            // Optional: Add some inline styles for better layout on print
+            printWindow.document.write('<style>body{ font-family: Arial; padding: 20px; } .table th, .table td { border: 1px solid #ccc !important; }</style>');
+
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(content); // insert your modal content
+            printWindow.document.write('</body></html>');
+
+            printWindow.document.close(); // finish writing
+            printWindow.focus();
+
+            // Delay print to allow rendering
+            setTimeout(function () {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        });
+
     // End
 
         // $(document).on('click', '.plus', function () {

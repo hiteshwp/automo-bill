@@ -154,6 +154,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('store', [EstimateController::class, 'store'])->name('garage-owner.estimate.store');
             Route::get('list', [EstimateController::class, 'list'])->name('garage-owner.estimate.list');
             Route::post('data', [EstimateController::class, 'getEstimateData'])->name('garage-owner.estimate.data'); // DataTable route
+            Route::get('{id}/edit/', action: [EstimateController::class, 'edit'])->name('garage-owner.estimate.edit');
         });
 
         // 🚀 Repair Order Management (Garage Owner Only)
@@ -171,6 +172,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('list', [InvoiceController::class, 'list'])->name('garage-owner.invoice.list');
             Route::post('data', [InvoiceController::class, 'getInvoiceData'])->name('garage-owner.invoice.data'); // DataTable route
             Route::post('getviewinvoicedetails', [InvoiceController::class, 'getViewInvoiceDetails']);
+            Route::get('{id}/edit/', action: [InvoiceController::class, 'edit'])->name('garage-owner.invoice.edit');
         });
 
         // 🚀 Vehicle Management (Garage Owner Only)

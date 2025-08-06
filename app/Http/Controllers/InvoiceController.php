@@ -40,6 +40,11 @@ class InvoiceController extends Controller
         $user = Auth::user();
         $user_id = $user->id;
 
+        $check_estimate = InvoiceModel::where('invoice_repairorder_id', $id)->first();
+        if ($check_estimate) {
+            return redirect()->route('garage-owner.invoice.edit', $check_estimate->invoice_id);
+        }
+
         $repair_order_data = RepairOrderModel::select('tbl_repair_order.*', 'users.name as client_name', 'users.address as client_address', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle', 'tbl_estimate.estimate_labor_total', 'tbl_estimate.estimate_parts_total', 'tbl_estimate.estimate_tax', 'tbl_estimate.estimate_total_inctax', 'tbl_estimate.estimate_total')
                         ->leftJoin('users', 'tbl_repair_order.repairorder_customer_id', '=', 'users.id')
                         ->leftJoin('tbl_vehicles', 'tbl_repair_order.repairorder_vehicle_id', '=', 'tbl_vehicles.id')
@@ -51,11 +56,13 @@ class InvoiceController extends Controller
                         ->first();
 
         $labour_data = EstimateLaborModel::where("estimate_labor_estimate_id", $repair_order_data->repairorder_estimate_id)
-                                        ->get();
+                                            ->where("estimate_labor_reference_type", "1")
+                                            ->get();
 
         $product_data = EstimatePartsModel::select("tbl_estimate_parts.*", "tbl_products.product_name as product_name")
                                             ->leftJoin('tbl_products', 'tbl_products.product_id', '=', 'tbl_estimate_parts.estimate_parts_product_id')
                                             ->where("estimate_parts_estimate_id", $repair_order_data->repairorder_estimate_id)
+                                            ->where("estimate_parts_reference_type", "1")
                                             ->get();
 
         $product_list = ProductModel::where('product_garage_owner_id', $user_id)
@@ -242,7 +249,7 @@ class InvoiceController extends Controller
             ->addColumn('invoice_date', fn($repair_order) => date("Y-m-d", strtotime($repair_order->invoice_date)))
             ->addColumn('action', fn($invoice) =>
                 '<button type="button" class="btn btn-soft-info btn-border btn-icon shadow-none btndisplayinvoicedetails" title="View PDF" data-invoiceid="'.$invoice->invoice_id.'" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewInvoice" aria-controls="offcanvasRight"><i class="ri-file-pdf-2-line"></i></button>
-                <a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></a>
+                <a href="'.route('garage-owner.invoice.edit', $invoice->invoice_id).'" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></a>
                 <a href="javascript:;" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="Send Email"><i class="ri-mail-send-line"></i></a>
                 <button type="button" class="btn btn-soft-warning btn-border btn-icon shadow-none" title="Pay" data-bs-toggle="offcanvas" data-bs-target="#sidebarPayment" aria-controls="offcanvasRight"><i class="ri-secure-payment-line"></i></button>
                 <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>'
@@ -306,5 +313,39 @@ class InvoiceController extends Controller
 
         );
         return response()->json($invoice_data);
+    }
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $invoice_data = InvoiceModel::select('tbl_invoices.*', 'users.name as client_name', 'users.countrycode', 'users.mobilenumber', 'users.address', 'users.email', 'tbl_vehicles.number_plate as number_plate', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle')
+                        ->leftJoin('users', 'tbl_invoices.invoice_customer_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_invoices.invoice_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->where('tbl_invoices.invoice_garage_id', $user_id)
+                        ->where('tbl_invoices.invoice_id', $id)
+                        ->where('users.user_type', 'User')
+                        ->whereNull('tbl_invoices.deleted_at')
+                        ->first();
+
+        //echo "<pre>"; print_r($invoice_data); die;
+
+        $labour_data = EstimateLaborModel::where("estimate_labor_estimate_id", $invoice_data->invoice_id)
+                                            ->where("estimate_labor_reference_type", "2")
+                                            ->get();
+        //echo "<pre>"; print_r($labour_data); die;
+
+        $product_data = EstimatePartsModel::select("tbl_estimate_parts.*", "tbl_products.product_name as product_name")
+                                            ->leftJoin('tbl_products', 'tbl_products.product_id', '=', 'tbl_estimate_parts.estimate_parts_product_id')
+                                            ->where("estimate_parts_estimate_id", $invoice_data->invoice_id)
+                                            ->where("estimate_parts_reference_type", "2")
+                                            ->get();
+
+        $product_list = ProductModel::where('product_garage_owner_id', $user_id)
+                                    ->orderBy('product_name', 'asc')
+                                    ->get();
+
+        return view('garage-owner.invoice.edit', compact('invoice_data', 'labour_data', 'product_data', 'product_list'));
     }
 }
