@@ -70,7 +70,7 @@
         <h5 id="offcanvasRightLabel">View Invoice</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
+    <div class="offcanvas-body" id="printinvoicedata">
         <div class="viewInformationBlock viewPurchaseInformationBlock">
             <div class="card p-3" id="demo">
                 <div class="row">
@@ -229,7 +229,7 @@
                 </div><!--end row-->
             </div>
             <div class="hstack gap-2 justify-content-end d-print-none mt-4">
-                <a href="javascript:window.print()" class="btn btn-success"><i class="ri-printer-line"></i> Print</a>
+                <a href="javascript:void(0);" class="btn btn-success" id="printBtn"><i class="ri-printer-line"></i> Print</a>
                 <a href="javascript:void(0);" class="btn btn-primary"><i class="ri-download-2-line"></i> Download</a>
                 <a href="javascript:void(0);" class="btn btn-danger">Close</a>
             </div>

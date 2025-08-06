@@ -37,6 +37,11 @@ class EstimateController extends Controller
         $user = Auth::user();
         $user_id = $user->id;
 
+        $check_estimate = EstimateModel::where('estimate_booking_id', $id)->first();
+        if ($check_estimate) {
+            return redirect()->route('garage-owner.estimate.edit', $check_estimate->estimate_id);
+        }
+
         $booking_data = BookingModel::select('tbl_booking.*', 'users.name as client_name', 'users.address as client_address', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle')
                         ->leftJoin('users', 'tbl_booking.booking_customer_id', '=', 'users.id')
                         ->leftJoin('tbl_vehicles', 'tbl_booking.booking_vehicle_id', '=', 'tbl_vehicles.id')
@@ -234,13 +239,47 @@ class EstimateController extends Controller
                 }
             })
             ->addColumn('action', fn($estimate) =>
-                '<button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></button>
+                '<a href="'.route('garage-owner.estimate.edit', $estimate->estimate_id).'" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></a>
                 <a href="javascript:;" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="Send Email"><i class="ri-mail-send-line"></i></a>
-                <button type="button" class="btn btn-soft-info btn-border btn-icon shadow-none" title="Booking"><i class="ri-calendar-schedule-line"></i></button>
                 <a href="'.route('garage-owner.repair-order.new', $estimate->estimate_id).'" class="btn btn-soft-warning btn-border btn-icon shadow-none btn-select3" title="Repair Order"><i class="ri-tools-line"></i></a>
                 <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>'
             )
             ->rawColumns(['estimate_carOwnerApproval', 'action'])
             ->make(true);
+    }
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $estimate_data = EstimateModel::select('tbl_estimate.*', 'users.name as client_name', 'users.id as client_id', 'users.address as client_address', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle', 'tbl_booking.booking_date_time as booking_date')
+                        ->leftJoin('users', 'tbl_estimate.estimate_customer_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_estimate.estimate_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->leftJoin('tbl_booking', 'tbl_estimate.estimate_booking_id', '=', 'tbl_booking.booking_id')
+                        ->where('tbl_estimate.estimate_garage_id', $user_id)
+                        ->where('users.user_type', 'User')
+                        ->where('tbl_estimate.estimate_id', $id)
+                        ->whereNull('tbl_estimate.deleted_at')
+                        ->first();
+
+        //echo "<pre>"; print_r($estimate_data); die;
+
+        $labour_data = EstimateLaborModel::where("estimate_labor_estimate_id", $estimate_data->estimate_id)
+                                            ->where("estimate_labor_reference_type", "1")
+                                            ->get();
+        //echo "<pre>"; print_r($labour_data); die;
+
+        $product_data = EstimatePartsModel::select("tbl_estimate_parts.*", "tbl_products.product_name as product_name")
+                                            ->leftJoin('tbl_products', 'tbl_products.product_id', '=', 'tbl_estimate_parts.estimate_parts_product_id')
+                                            ->where("estimate_parts_estimate_id", $estimate_data->estimate_id)
+                                            ->where("estimate_parts_reference_type", "1")
+                                            ->get();
+
+        $product_list = ProductModel::where('product_garage_owner_id', $user_id)
+                                    ->orderBy('product_name', 'asc')
+                                    ->get();
+
+        return view('garage-owner.estimate.edit', compact('estimate_data', 'labour_data', 'product_data', 'product_list'));
     }
 }
