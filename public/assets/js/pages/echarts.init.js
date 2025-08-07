@@ -1530,6 +1530,7 @@ var posList,
         chartHeatmapColors =
         (chartGaugeColors &&
             ((chartDom = document.getElementById("chart-allbooking")),
+                totalValue = parseInt(chartDom.dataset.total || 0),
                 (myChart = echarts.init(chartDom)),
                 (option = {
                     tooltip: {
@@ -1543,6 +1544,9 @@ var posList,
                     series: [{
                         name: "AllBooking",
                         type: "gauge",
+                        min: 0,
+                        max: 1000,
+                        splitNumber: 10,
                         progress: {
                             show: !0
                         },
@@ -1558,7 +1562,7 @@ var posList,
                             title: {
                                 color: "#858d98"
                             },
-                            value: 50,
+                            value: totalValue,
                             name: "Total"
                         }],
                     }, ],
@@ -1571,6 +1575,7 @@ var posList,
         chartHeatmapColors =
         (chartGaugeColors &&
             ((chartDom = document.getElementById("chart-repairorder")),
+                totalValue = parseInt(chartDom.dataset.total || 0),
                 (myChart = echarts.init(chartDom)),
                 (option = {
                     tooltip: {
@@ -1584,6 +1589,9 @@ var posList,
                     series: [{
                         name: "RepairOrder",
                         type: "gauge",
+                        min: 0,
+                        max: 1000,
+                        splitNumber: 10,
                         progress: {
                             show: !0
                         },
@@ -1599,7 +1607,7 @@ var posList,
                             title: {
                                 color: "#858d98"
                             },
-                            value: 15,
+                            value: totalValue,
                             name: "Total"
                         }],
                     }, ],
@@ -1625,6 +1633,9 @@ var posList,
                     series: [{
                         name: "Outstanding Invoice",
                         type: "gauge",
+                        min: 0,
+                        max: 1000,
+                        splitNumber: 10,
                         progress: {
                             show: !0
                         },
@@ -1640,7 +1651,7 @@ var posList,
                             title: {
                                 color: "#858d98"
                             },
-                            value: 15,
+                            value: 0,
                             name: "Total"
                         }],
                     }, ],
@@ -1666,6 +1677,9 @@ var posList,
                     series: [{
                         name: "PaidInvoice",
                         type: "gauge",
+                        min: 0,
+                        max: 1000,
+                        splitNumber: 10,
                         progress: {
                             show: !0
                         },
@@ -1681,7 +1695,7 @@ var posList,
                             title: {
                                 color: "#858d98"
                             },
-                            value: 15,
+                            value: 0,
                             name: "Total"
                         }],
                     }, ],

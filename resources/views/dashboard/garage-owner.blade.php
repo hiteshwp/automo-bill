@@ -21,8 +21,8 @@
                 <div class="col-12 col-lg-8">
                     <div class="dashboardBannerInfoBlock">
                         <div class="dashboardBannerLogo">
-                            <img src="assets/images/logo-light.png" alt="" class="bannerBrandLogo" />
-                            <img src="assets/images/aws-logo.png" alt="" class="bannerAwsLogo" />
+                            <img src="{{ asset('assets/images/logo-light.png') }}" alt="" class="bannerBrandLogo" />
+                            <img src="{{ asset('assets/images/aws-logo.png') }}" alt="" class="bannerAwsLogo" />
                         </div>
                         <h4 class="mb-0">Auto Repair Shop Software</h4>
                         <span class="text-white">(made by mechanics for mechanics)</span>
@@ -33,19 +33,19 @@
                         <div class="dashboardBannerList">
                             <h5>Easy Use</h5>
                             <div class="dashboardBannerAction">
-                                <img src="assets/images/carfax-logo.png" alt="" />
+                                <img src="{{ asset('assets/images/carfax-logo.png') }}" alt="" />
                             </div>
                         </div>
                         <div class="dashboardBannerList">
                             <h5>Your Plan</h5>
                             <div class="dashboardBannerAction">
-                                <img src="assets/images/carmd-logo.png" alt="" />
+                                <img src="{{ asset('assets/images/carmd-logo.png') }}" alt="" />
                             </div>
                         </div>
                         <div class="dashboardBannerList">
                             <h5>Getting Started <a href="#" class="btn-arrow btn-arrow-light"><i class="ri-arrow-right-up-long-line"></i></a></h5>
                             <div class="dashboardBannerAction">
-                                <img src="assets/images/youtube-logo.png" alt="" />
+                                <img src="{{ asset('assets/images/youtube-logo.png') }}" alt="" />
                             </div>
                         </div>
                         <div class="dashboardBannerList">
@@ -67,12 +67,12 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h4 class="card-title mb-0">All Booking</h4>
-                            <a href="#" class="btn btn-light btn-sm waves-effect">View Report <i class="ri-arrow-right-long-line"></i></a>
+                            <a href="{{ route('garage-owner.booking.list') }}" class="btn btn-light btn-sm waves-effect">View Report <i class="ri-arrow-right-long-line"></i></a>
                         </div>
                         <div class="card-body position-relative">
-                            <div id="chart-allbooking" data-colors='["#03C03C"]' class="gauge-charts"></div>
+                            <div id="chart-allbooking" data-colors='["#03C03C"]' class="gauge-charts" data-total="{{ $total_booking }}"></div>
                             <div class="chartLogo">
-                                <img src="assets/images/logo-dark.png" alt="" />
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" />
                             </div>
                         </div>
                     </div>
@@ -84,12 +84,12 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h4 class="card-title mb-0">Repair Orders</h4>
-                            <a href="#" class="btn btn-light btn-sm waves-effect">View Report <i class="ri-arrow-right-long-line"></i></a>
+                            <a href="{{ route('garage-owner.repair-order.list') }}" class="btn btn-light btn-sm waves-effect">View Report <i class="ri-arrow-right-long-line"></i></a>
                         </div>
                         <div class="card-body position-relative">
-                            <div id="chart-repairorder" data-colors='["#FFBF00"]' class="gauge-charts"></div>
+                            <div id="chart-repairorder" data-colors='["#FFBF00"]' class="gauge-charts" data-total="{{ $total_repair_order }}"></div>
                             <div class="chartLogo">
-                                <img src="assets/images/logo-dark.png" alt="" />
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" />
                             </div>
                         </div>
                     </div>
@@ -106,7 +106,7 @@
                         <div class="card-body position-relative">
                             <div id="chart-outstandinginvoice" data-colors='["#C51E3A"]' class="gauge-charts"></div>
                             <div class="chartLogo">
-                                <img src="assets/images/logo-dark.png" alt="" />
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" />
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
                         <div class="card-body position-relative">
                             <div id="chart-paidinvoice" data-colors='["#007FFF"]' class="gauge-charts"></div>
                             <div class="chartLogo">
-                                <img src="assets/images/logo-dark.png" alt="" />
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" />
                             </div>
                         </div>
                     </div>
@@ -366,105 +366,28 @@
                                             <th>Vehicle Number</th>
                                             <th>Date/Time</th>
                                             <th>Service Status</th>
-                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <span class="tName">Elena smith</span>
-                                                <span class="tEmail">elenasmith387@gmail.com</span>
-                                            </td>
-                                            <td>GJ-01-AS-1234</td>
-                                            <td>23-01-2023 | 01:05 PM</td>
-                                            <td><span class="badge bg-success-subtle text-success">Done</span></td>
-                                            <td>
-                                                <div class="tAction">
-                                                    <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none">
-                                                        <i class="ri-edit-line"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="tName">Elena smith</span>
-                                                <span class="tEmail">elenasmith387@gmail.com</span>
-                                            </td>
-                                            <td>GJ-01-AS-1234</td>
-                                            <td>23-01-2023 | 01:05 PM</td>
-                                            <td><span class="badge bg-success-subtle text-success">Done</span></td>
-                                            <td>
-                                                <div class="tAction">
-                                                    <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none">
-                                                        <i class="ri-edit-line"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="tName">Elena smith</span>
-                                                <span class="tEmail">elenasmith387@gmail.com</span>
-                                            </td>
-                                            <td>GJ-01-AS-1234</td>
-                                            <td>23-01-2023 | 01:05 PM</td>
-                                            <td><span class="badge bg-success-subtle text-success">Done</span></td>
-                                            <td>
-                                                <div class="tAction">
-                                                    <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none">
-                                                        <i class="ri-edit-line"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="tName">Elena smith</span>
-                                                <span class="tEmail">elenasmith387@gmail.com</span>
-                                            </td>
-                                            <td>GJ-01-AS-1234</td>
-                                            <td>23-01-2023 | 01:05 PM</td>
-                                            <td><span class="badge bg-success-subtle text-success">Done</span></td>
-                                            <td>
-                                                <div class="tAction">
-                                                    <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none">
-                                                        <i class="ri-edit-line"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="tName">Elena smith</span>
-                                                <span class="tEmail">elenasmith387@gmail.com</span>
-                                            </td>
-                                            <td>GJ-01-AS-1234</td>
-                                            <td>23-01-2023 | 01:05 PM</td>
-                                            <td><span class="badge bg-success-subtle text-success">Done</span></td>
-                                            <td>
-                                                <div class="tAction">
-                                                    <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none">
-                                                        <i class="ri-edit-line"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        @foreach($booking_data as $booking_data_list)
+                                            <tr>
+                                                <td>
+                                                    <span class="tName">{{ $booking_data_list->client_name }}</span>
+                                                    <span class="tEmail">{{ $booking_data_list->client_email }}</span>
+                                                </td>
+                                                <td>{{ $booking_data_list->number_plate }}</td>
+                                                <td>{{ date("Y-m-d", strtotime($booking_data_list->booking_date)) }} | {{ date("h:i A", strtotime($booking_data_list->booking_time)) }}</td>
+                                                <td>
+                                                    @if ($booking_data_list->booking_status === '2')
+                                                        <span class="badge bg-success-subtle text-success">Done</span>
+                                                    @elseif ($booking_data_list->booking_status === '1')
+                                                        <span class="badge bg-warning-subtle text-warning">Pending</span>
+                                                    @else ($booking_data_list->booking_status === '3')
+                                                        <span class="badge bg-danger-subtle text-danger">Cancelled</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach                                        
                                     </tbody>
                                 </table>
                             </div>
