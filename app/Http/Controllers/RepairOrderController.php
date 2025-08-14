@@ -16,6 +16,7 @@ use App\Models\EstimateModel;
 use App\Models\EstimateLaborModel;
 use App\Models\EstimatePartsModel;
 use App\Models\RepairOrderModel;
+use App\Models\InvoiceModel;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -38,6 +39,11 @@ class RepairOrderController extends Controller
     {
         $user = Auth::user();
         $user_id = $user->id;
+
+        $check_repair_order = RepairOrderModel::where('repairorder_estimate_id', $id)->first();
+        if ($check_repair_order) {
+            return redirect()->route('garage-owner.repair-order.edit', $check_repair_order->repairorder_id);
+        }
 
         $estimate_data = EstimateModel::select('tbl_estimate.*', 'users.name as client_name', 'users.address as client_address', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle')
                         ->leftJoin('users', 'tbl_estimate.estimate_customer_id', '=', 'users.id')
@@ -239,5 +245,39 @@ class RepairOrderController extends Controller
         } while (ProductModel::where('product_number', $number)->exists());
 
         return $number;
+    }
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $repair_order_data = RepairOrderModel::select('tbl_repair_order.*', 'users.name as client_name', 'users.address as client_address', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle', 'tbl_estimate.estimate_labor_total', 'tbl_estimate.estimate_parts_total', 'tbl_estimate.estimate_tax', 'tbl_estimate.estimate_total_inctax', 'tbl_estimate.estimate_total')
+                        ->leftJoin('users', 'tbl_repair_order.repairorder_customer_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_repair_order.repairorder_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->leftJoin('tbl_estimate', 'tbl_repair_order.repairorder_estimate_id', '=', 'tbl_estimate.estimate_id')
+                        ->where('tbl_repair_order.repairorder_garage_id', $user_id)
+                        ->where('users.user_type', 'User')
+                        ->where('tbl_repair_order.repairorder_id', $id)
+                        ->whereNull('tbl_repair_order.deleted_at')
+                        ->first();
+
+        //echo "<pre>"; print_r($repair_order_data); die;
+
+        $labour_data = EstimateLaborModel::where("estimate_labor_estimate_id", $repair_order_data->repairorder_estimate_id)
+                                            ->where("estimate_labor_reference_type", "1")
+                                            ->get();
+        //echo "<pre>"; print_r($labour_data); die;
+
+        $product_data = EstimatePartsModel::select("tbl_estimate_parts.*", "tbl_products.product_name as product_name")
+                                            ->leftJoin('tbl_products', 'tbl_products.product_id', '=', 'tbl_estimate_parts.estimate_parts_product_id')
+                                            ->where("estimate_parts_estimate_id", $repair_order_data->repairorder_estimate_id)
+                                            ->where("estimate_parts_reference_type", "1")
+                                            ->get();
+
+        $total_hours = EstimateLaborModel::where("estimate_labor_estimate_id", $id)
+                                        ->sum('estimate_labor_hours');
+
+        return view('garage-owner.repair-order.edit', compact('repair_order_data', 'labour_data', 'product_data', 'total_hours'));
     }
 }

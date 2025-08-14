@@ -3973,22 +3973,335 @@ $(document).ready(function() {
 
     // End
 
-        // $(document).on('click', '.plus', function () {
-        //     var $qty = $(this).siblings('.product-quantity');
-        //     var current = parseInt($qty.val()) || 0;
-        //     $qty.val(current + 1).trigger('input');
-        // });
 
-        // $(document).on('click', '.minus', function () {
-        //     var $qty = $(this).siblings('.product-quantity');
-        //     var current = parseInt($qty.val()) || 1;
-        //     if (current > 1) {
-        //         $qty.val(current - 1).trigger('input');
-        //     }
-        // });
+    // User Profile Image and Backgorund Image Update
 
+        // Foreground Image
+        $("#profile-foreground-img-file-input").on("change", function () {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    $(".profile-wid-img").attr("src", e.target.result); // instant preview
+                };
+                reader.readAsDataURL(file);
 
+                uploadImage(file, "Cover");
+            }
+        });
 
-    // 
+        // Profile Image
+        $("#profile-img-file-input").on("change", function () {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    $(".user-profile-image").attr("src", e.target.result); // instant preview
+                };
+                reader.readAsDataURL(file);
+
+                uploadImage(file, "Profile");
+            }
+        });
+
+        function uploadImage(file, type) {
+            let formData = new FormData();
+            formData.append("image", file);
+            formData.append("type", type);
+            formData.append("_token", csrfToken); // csrfToken should be defined in Blade
+
+            $.ajax({
+                url: baseUrl + "/profile/update-profile-image", // baseUrl should be defined in Blade
+                type: "POST",
+                data: formData,
+                processData: false, // important for file upload
+                contentType: false, // important for file upload
+                beforeSend: function () {
+                    $(".imageloader").addClass("offcanvas-loader");
+                },
+                success: function (data) {
+                    $(".imageloader").removeClass("offcanvas-loader");
+                    if (data.status === "success") {
+                        toastr.success(data.message);
+                        setTimeout(function() {
+                            window.location.href = baseUrl + '/profile/view';
+                        }, 3000);
+
+                    } else {
+                        toastr.error(data.message || "Something went wrong");
+                    }
+                },
+                error: function () {
+                    toastr.error("Server error occurred");
+                }
+            });
+        }
+
+        $('#frmupdateprofile').parsley();
+        $('#frmupdateprofile').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmupdateprofile').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/profile/update',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btngopupdate").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btngopupdate").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            $('#frmupdateprofile').parsley().reset();
+                            setTimeout(function() {
+                                window.location.href = baseUrl + '/profile/view';
+                            }, 3000);
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btngopupdate").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#frmupdategoppassword').parsley();
+        $('#frmupdategoppassword').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmupdategoppassword').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/profile/change-password',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#txtgopchangepassword").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#txtgopchangepassword").prop('disabled', false).text('Change Password');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+
+                            $('#frmupdategoppassword').trigger("reset");
+                            $('#frmupdategoppassword').parsley().reset();
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#txtgopchangepassword").prop('disabled', false).text('Change Password');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+    // End
+
+    // Setting section start
+
+        $('#frmfinancialsetting').parsley();
+        $('#frmfinancialsetting').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmfinancialsetting').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/settings/update-financial-settings',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btnfinancialsetting").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btnfinancialsetting").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            setTimeout(function() {
+                                window.location.href = baseUrl + '/settings/view';
+                            }, 3000);
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btnfinancialsetting").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#frmcompanysetting').parsley();
+        $('#frmcompanysetting').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmcompanysetting').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/settings/update-company-settings',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btncomapanysetting").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btncomapanysetting").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            setTimeout(function() {
+                                window.location.href = baseUrl + '/settings/view';
+                            }, 3000);
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btncomapanysetting").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+    // End
 
 });

@@ -234,13 +234,16 @@
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
                                 <h6 class="dropdown-header">Welcome {{ Auth::user()->name }}!</h6>
-                                <a class="dropdown-item" href="#"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Profile</span></a>
-                                <a class="dropdown-item" href="#"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
+                                @if(auth()->user()->user_type === 'Garage Owner')
+                                    <a class="dropdown-item" href="{{ route('garage-owner.profile') }}"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Profile</span></a>
+                                    <a class="dropdown-item" href="#"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
+                                    <a class="dropdown-item" href="{{ route('garage-owner.setting') }}"><i class="ri-settings-3-line align-middle me-1"></i> <span class="align-middle">Setting</span></a>
+                                    <a class="dropdown-item" href="#"><i class="ri-lock-line align-middle me-1"></i> <span class="align-middle">Lock screen</span></a>
+                                @endif
+                                
                                 @if(auth()->user()->user_type === 'Super Admin')
                                     <a class="dropdown-item" href="{{ route('admin.index') }}"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Admin List</span></a>
                                 @endif
-                                <a class="dropdown-item" href="#"><i class="ri-settings-3-line align-middle me-1"></i> <span class="align-middle">Setting</span></a>
-                                <a class="dropdown-item" href="#"><i class="ri-lock-line align-middle me-1"></i> <span class="align-middle">Lock screen</span></a>
                                 <a class="dropdown-item" href="{{ route('logout') }}"><i class="ri-logout-box-r-line align-middle me-1"></i> <span class="align-middle" data-key="t-logout">Logout</span></a>
                             </div>
                         </div>
@@ -841,6 +844,9 @@
 
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- <script src="{{ asset('assets/js/pages/profile-setting.init.js') }}"></script> -->
+
     <!-- App js -->
     <script src="{{ asset('assets/js/parsley.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
@@ -856,6 +862,10 @@
 
         get_phone_code("#newadminphone", "#btn-admin", "#error-msg-admin", "#valid-msg-admin", "#newadminphonecode", "#newadminphoneicocode");
         get_phone_code("#updateadminphone", "#btn-admin-update", "#error-msg-admin-update", "#valid-msg-admin-update", "#updateadminphonecode", "#updateadminphoneicocode");
+
+        get_phone_code("#txtgopphonenumber", "#btn-gop", "#error-msg-gop", "#valid-msg-gop", "#txtgopphonecode", "#txtgopphoneicocode");
+
+        get_phone_code("#txtcompanyphone", "#btn-bsp", "#error-msg-bsp", "#valid-msg-bsp", "#txtcspphonecode", "#txtcspphoneicocode");
 
         function get_phone_code(selector, btnId, errorId, validId, phonecode, isocode) {
             const input = document.querySelector(selector);
@@ -935,6 +945,96 @@
     </script>
 
     <script src="{{ asset('assets/js/datatable.js') }}"></script>
+
+    <script>
+        @if (session('status'))
+            toastr.success("{{ session('status') }}", "Success", { timeOut: 5000 });
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error("{{ $error }}", "Error", { timeOut: 5000 });
+            @endforeach
+        @endif
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let baseUrl = $(".siteurl").data("url");
+            $('#country').on('change', function () {
+                let countryId = $(this).val();
+                $('#state').empty().append('<option value="">Select State</option>');
+                $('#city').empty().append('<option value="">Select City</option>');
+                if (countryId) {
+                    loadStates(countryId, null);
+                }
+            });
+
+            $('#state').on('change', function () {
+                let stateId = $(this).val();
+                $('#city').empty().append('<option value="">Select City</option>');
+                if (stateId) {
+                    loadCities(stateId, null);
+                }
+            });
+
+            function loadStates(countryId, preSelectedState) {
+                $.ajax({
+                    url: baseUrl + '/get-states/' + countryId,
+                    type: 'GET',
+                    success: function (states) {
+                        $('#state').empty().append('<option value="">Select State</option>');
+                        $.each(states, function (id, name) {
+                            $('#state').append('<option value="' + id + '">' + name + '</option>');
+                        });
+
+                        if (preSelectedState) {
+                            $('#state').val(preSelectedState);
+                            loadCities(preSelectedState, selectedCity);
+                        }
+                    }
+                });
+            }
+
+            function loadCities(stateId, preSelectedCity) {
+                $.ajax({
+                    url: baseUrl + '/get-cities/' + stateId,
+                    type: 'GET',
+                    success: function (cities) {
+                        $('#city').empty().append('<option value="">Select City</option>');
+                        $.each(cities, function (id, name) {
+                            $('#city').append('<option value="' + id + '">' + name + '</option>');
+                        });
+
+                        if (preSelectedCity) {
+                            $('#city').val(preSelectedCity);
+                        }
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.querySelector('.filepond-input-circle');
+            if (!fileInput) {
+                return; // Exit if we're not on the settings page
+            }
+
+            const companyLogo = document.getElementById('companysettingimage').getAttribute('data-imagepath');
+            FilePond.create(fileInput, {
+                allowImagePreview: true,
+                imagePreviewHeight: 250,
+                files: companyLogo
+                    ? [
+                        {
+                            source: companyLogo,
+                            options: { type: 'remote' }
+                        }
+                    ]
+                    : []
+            });
+        });
+    </script>
     
 </body>
 

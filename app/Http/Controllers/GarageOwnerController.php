@@ -60,8 +60,13 @@ class GarageOwnerController extends Controller
                 }
             })
             ->addColumn('name', function ($owner) {
+                $profile_image = asset('assets/images/users/avatar-1.jpg');
+                if( $owner->user_profile_pic )
+                {
+                    $profile_image = asset('uploads/profiles/garage-owner/'.$owner->user_profile_pic);
+                }
                 return '<div class="position-relative ownerName">
-                            <img src="'.asset('assets/images/users/avatar-1.jpg').'" alt="" class="avatar-xs rounded-circle me-2">
+                            <img src="'.$profile_image.'" alt="" class="avatar-xs rounded-circle me-2">
                             <span class="ownerNameCounter">' . ($owner->garage_users_count ?? $owner->garage_user_count ?? 0) . '</span>
                             <span class="text-body fw-medium">'.$owner->name.'</span>
                         </div>';
@@ -103,7 +108,7 @@ class GarageOwnerController extends Controller
         $profilepic = asset('assets/images/users/avatar-1.jpg');
         if($garageOwner["user_profile_pic"])
         {
-            $profilepic = "";
+            $profilepic = asset('uploads/profiles/garage-owner/'.$garageOwner["user_profile_pic"]);
         }
         $owner_data = array(
             "name"              =>  $garageOwner["name"],

@@ -8,11 +8,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Authenticatable
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Auth\Passwords\CanResetPassword;
+
+class User extends Authenticatable implements CanResetPasswordContract
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
     use SoftDeletes;
+     use CanResetPassword;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +27,8 @@ class User extends Authenticatable
         'name',
         'businessname',
         'mobilenumber',
+        'user_profile_pic',
+        'user_profile_background_pic',
         'email',
         'password',
         'taxnumber',
