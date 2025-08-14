@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\GarageOwnerController;
 use App\Http\Controllers\RepairOrderController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\VehiclesController;
 use App\Http\Controllers\SearchClientController;
 use App\Http\Controllers\SearchVehicleController;
@@ -19,6 +20,8 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EstimateController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Middleware\CheckGarageSubscription;
@@ -163,6 +166,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('store', [RepairOrderController::class, 'store'])->name('garage-owner.repair-order.store');
             Route::get('list', [RepairOrderController::class, 'list'])->name('garage-owner.repair-order.list');
             Route::post('data', [RepairOrderController::class, 'getRepairOrderData'])->name('garage-owner.repair-order.data'); // DataTable route
+            Route::get('{id}/edit/', action: [RepairOrderController::class, 'edit'])->name('garage-owner.repair-order.edit');
         });
 
         // 🚀 Invoice Management (Garage Owner Only)
@@ -174,6 +178,21 @@ Route::middleware(['auth'])->group(function () {
             Route::post('getviewinvoicedetails', [InvoiceController::class, 'getViewInvoiceDetails']);
             Route::get('{id}/edit/', action: [InvoiceController::class, 'edit'])->name('garage-owner.invoice.edit');
         });
+
+        Route::group(['prefix' => 'profile'], function () {
+            Route::get('/view', [DashboardController::class, 'garageOwnerProfile'])->name('garage-owner.profile');
+            Route::post('/update-profile-image', [DashboardController::class, 'updateGarageOwnerImage'])->name('garage-owner.profile.updateImage');
+            Route::post('/update', [DashboardController::class, 'updateGarageOwnerProfile'])->name('garage-owner.profile.update');
+            Route::post('/change-password', [DashboardController::class, 'updateGarageOwnerPassword'])->name('garage-owner.profile.change-password');
+        });
+
+         Route::group(['prefix' => 'settings'], function () {
+            Route::get('/view', [SettingController::class, 'index'])->name('garage-owner.setting');
+            Route::post('/update-financial-settings', [SettingController::class, 'updateFinancialSettings'])->name('garage-owner.settings.financial-setting');
+            Route::post('/update-company-settings', [SettingController::class, 'updateCompanySettings'])->name('garage-owner.settings.company-setting');
+        });
+
+        Route::get('/send-welcome', [DashboardController::class, 'sendWelcomeEmail']);
 
         // 🚀 Vehicle Management (Garage Owner Only)
         // Route::group(['prefix' => 'vehicles'], function () {

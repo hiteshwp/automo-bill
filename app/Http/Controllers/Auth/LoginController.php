@@ -21,8 +21,12 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended('/dashboard');
+        $remember = $request->filled('remember'); // true if checked
+
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard')
+            ->with('status', 'Welcome back, ' . Auth::user()->name . '!');
         }
 
         return back()->withErrors(['email' => 'Invalid credentials']);

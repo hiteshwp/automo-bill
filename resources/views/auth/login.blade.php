@@ -16,6 +16,10 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css-->
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+
 </head>
 
 <body>
@@ -69,7 +73,7 @@
                                     </div>
     
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
+                                        <input class="form-check-input" type="checkbox" name="remember" value="" id="auth-remember-check">
                                         <label class="form-check-label" for="auth-remember-check">{{ __('Remember me') }}</label>
                                         @if (Route::has('password.request'))
                                             <div class="float-end">
@@ -140,5 +144,22 @@
     <script src="{{ asset('assets/js/plugins.js') }}"></script>
     <!-- password-addon init -->
     <script src="{{ asset('assets/js/pages/password-addon.init.js') }}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        @if (session('status'))
+            toastr.success("{{ session('status') }}", "Success", { timeOut: 5000 });
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error("{{ $error }}", "Error", { timeOut: 5000 });
+            @endforeach
+        @endif
+    </script>
 </body>
 </html>

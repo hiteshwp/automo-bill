@@ -16,6 +16,9 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css-->
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
 </head>
 
 <body>
@@ -37,6 +40,17 @@
                                 <div class="alert border-0 alert-warning text-center mb-2" role="alert">
                                     Enter your email and instructions will be sent to you!
                                 </div>
+
+                                <!-- Display General Errors -->
+                                    @if ($errors->any())
+                                        <div class="alert alert-danger">
+                                            <ul>
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
                             </div>
     
                             <div class="auth-form">
@@ -44,7 +58,10 @@
                                 @csrf
                                     <div class="mb-3">
                                         <label for="username" class="form-label">Email Address*</label>
-                                        <input type="text" class="form-control" id="emailaddress" placeholder="Enter your email address" :value="old('email')">
+                                        <input type="text" name="email" class="form-control" id="emailaddress" placeholder="Enter your email address" :value="old('email')">
+                                        @error('email')
+                                            <div class="text-danger" role="alert">{{ $message }}</div>
+                                        @enderror
                                     </div>
 
                                     <div class="mt-4">
@@ -97,5 +114,23 @@
     <script src="{{ asset('assets/js/plugins.js') }}"></script>
     <!-- password-addon init -->
     <script src="{{ asset('assets/js/pages/password-addon.init.js') }}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        @if (session('status'))
+            toastr.success("{{ session('status') }}", "Success", { timeOut: 5000 });
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error("{{ $error }}", "Error", { timeOut: 5000 });
+            @endforeach
+        @endif
+    </script>
+    
 </body>
 </html>
