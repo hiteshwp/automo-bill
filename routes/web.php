@@ -24,6 +24,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\GoogleCalendarController;
+
 use App\Http\Middleware\CheckGarageSubscription;
 
 Route::get('/', function () {
@@ -31,6 +34,19 @@ Route::get('/', function () {
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+// Public routes for Google login
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+
+// Protected routes (require Laravel login)
+Route::middleware('auth')->group(function () {
+    Route::post('/google/events', [GoogleCalendarController::class, 'store'])->name('google.events.store');
+    Route::get('/google/events', [GoogleCalendarController::class, 'index'])->name('google.events.index');
+    Route::delete('/google/disconnect', [GoogleAuthController::class, 'disconnect'])->name('google.disconnect');
+});
+
 
 // 🛠 Route for role-based dashboard redirection
 Route::middleware(['auth'])->group(function () {
@@ -90,6 +106,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('view', [ClientsController::class, 'view']);
             Route::post('update', [ClientsController::class, 'update']);
             Route::delete('remove-details/{id}', [ClientsController::class, 'removedetails'])->name('client.removedetails');
+            Route::post('vehicle-client-detail', [ClientsController::class, 'vehicleClentDetail']);
+            Route::post('generate-password', [ClientsController::class, 'generateNewPassword']);
 
             Route::get('{id}/vehicles', [VehiclesController::class, 'index'])->name('garage-owner.clients.vehicles.page');
             Route::post('vehicles/data', [VehiclesController::class, 'getClientsVehicleData'])->name('garage-owner.clients.vehicles.data');
@@ -158,6 +176,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('list', [EstimateController::class, 'list'])->name('garage-owner.estimate.list');
             Route::post('data', [EstimateController::class, 'getEstimateData'])->name('garage-owner.estimate.data'); // DataTable route
             Route::get('{id}/edit/', action: [EstimateController::class, 'edit'])->name('garage-owner.estimate.edit');
+            Route::post('get-product-detail', [EstimateController::class, 'getProductData']);
+            Route::post('update', [EstimateController::class, 'update']);
         });
 
         // 🚀 Repair Order Management (Garage Owner Only)
@@ -167,6 +187,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('list', [RepairOrderController::class, 'list'])->name('garage-owner.repair-order.list');
             Route::post('data', [RepairOrderController::class, 'getRepairOrderData'])->name('garage-owner.repair-order.data'); // DataTable route
             Route::get('{id}/edit/', action: [RepairOrderController::class, 'edit'])->name('garage-owner.repair-order.edit');
+            Route::post('update', [RepairOrderController::class, 'update']);
         });
 
         // 🚀 Invoice Management (Garage Owner Only)
@@ -177,6 +198,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('data', [InvoiceController::class, 'getInvoiceData'])->name('garage-owner.invoice.data'); // DataTable route
             Route::post('getviewinvoicedetails', [InvoiceController::class, 'getViewInvoiceDetails']);
             Route::get('{id}/edit/', action: [InvoiceController::class, 'edit'])->name('garage-owner.invoice.edit');
+            Route::post('update', [InvoiceController::class, 'update']);
         });
 
         Route::group(['prefix' => 'profile'], function () {
@@ -186,7 +208,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/change-password', [DashboardController::class, 'updateGarageOwnerPassword'])->name('garage-owner.profile.change-password');
         });
 
-         Route::group(['prefix' => 'settings'], function () {
+        Route::group(['prefix' => 'settings'], function () {
             Route::get('/view', [SettingController::class, 'index'])->name('garage-owner.setting');
             Route::post('/update-financial-settings', [SettingController::class, 'updateFinancialSettings'])->name('garage-owner.settings.financial-setting');
             Route::post('/update-company-settings', [SettingController::class, 'updateCompanySettings'])->name('garage-owner.settings.company-setting');
@@ -194,26 +216,45 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/send-welcome', [DashboardController::class, 'sendWelcomeEmail']);
 
-        // 🚀 Vehicle Management (Garage Owner Only)
-        // Route::group(['prefix' => 'vehicles'], function () {
-        //     Route::get('list', [ClientsController::class, 'index'])->name('garage-owner.vehicle.index');
-        //     Route::post('data', [ClientsController::class, 'getVehiclesData'])->name('garage-owner.vehicle.data'); // DataTable route
-        //     Route::get('detail/{id}', [ClientsController::class, 'vehicledetail'])->name('garage-owner.vehicle.details');
-        //     Route::post('store', [ClientsController::class, 'store'])->name('client.store');
-        //     Route::post('view', [ClientsController::class, 'view']);
-        //     Route::post('update', [ClientsController::class, 'update']);
-        //     Route::delete('remove-details/{id}', [ClientsController::class, 'removedetails'])->name('garage-owner.vehicle.removedetails');
-        // });
-
-
         Route::group(['prefix' => 'plans'], function () {
-            Route::get('list', [PlansController::class, 'index'])->name('plans.index');
+            Route::get('/list', [PlansController::class, 'index'])->name('garage-owner.plans.index');
+            Route::get('/my-account-view', [PlansController::class, 'myAccountView'])->name('garage-owner.plans.my-account-view');
         });
     });
 
     // User Routes
     Route::middleware('role:User')->group(function () {
         Route::get('/user-dashboard', [DashboardController::class, 'userDashboard'])->name('dashboard.user');
+
+        // 🚀 Booking Management (Garage Owner Only)
+        Route::group(['prefix' => 'my-booking'], function () {
+            Route::get('list', [BookingController::class, 'clientBookingList'])->name('user.booking.list');
+            Route::post('data', [BookingController::class, 'getClientBookingData'])->name('user.booking.data');
+            Route::post('store', [BookingController::class, 'storeClientBookingData'])->name('user.booking.store');
+            Route::post('getviewclientbookingdetails', [BookingController::class, 'getViewClientBookingDetails']);
+            Route::post('update', [BookingController::class, 'clientDataUpdate']);
+        });
+
+         // 🚀 Estimate Management (Garage Owner Only)
+        Route::group(['prefix' => 'my-estimate'], function () {
+            Route::get('list', [EstimateController::class, 'clientEstimateLlist'])->name('user.estimate.list');
+            Route::post('data', [EstimateController::class, 'getClientEstimateData'])->name('user.estimate.data'); // DataTable route
+            Route::post('update', [EstimateController::class, 'update']);
+        });
+
+        // 🚀 Repair Order Management (Garage Owner Only)
+        Route::group(['prefix' => 'my-repair-order'], function () {
+            Route::get('list', [RepairOrderController::class, 'list'])->name('user.repair-order.list');
+            Route::post('data', [RepairOrderController::class, 'getRepairOrderData'])->name('user.repair-order.data'); // DataTable route
+            Route::post('update', [RepairOrderController::class, 'update']);
+        });
+
+        // 🚀 Invoice Management (Garage Owner Only)
+        Route::group(['prefix' => 'my-invoice'], function () {
+            Route::get('list', [InvoiceController::class, 'list'])->name('user.invoice.list');
+            Route::post('data', [InvoiceController::class, 'getInvoiceData'])->name('user.invoice.data'); // DataTable route
+            Route::post('update', [InvoiceController::class, 'update']);
+        });
     });
 });
 

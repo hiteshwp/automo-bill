@@ -15,6 +15,7 @@ use App\Models\ProductModel;
 use App\Models\EstimateModel;
 use App\Models\EstimateLaborModel;
 use App\Models\EstimatePartsModel;
+use App\Models\SettingModel;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -55,7 +56,9 @@ class EstimateController extends Controller
                                     ->orderBy('product_name', 'asc')
                                     ->get();
 
-        return view('garage-owner.estimate.new', compact('booking_data', 'product_list'));
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
+        return view('garage-owner.estimate.new', compact('booking_data', 'product_list', 'setting_data'));
     }
 
     public function store(Request $request)
@@ -238,12 +241,21 @@ class EstimateController extends Controller
                     return '<span class="text-danger">Rejected</span>';
                 }
             })
-            ->addColumn('action', fn($estimate) =>
-                '<a href="'.route('garage-owner.estimate.edit', $estimate->estimate_id).'" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></a>
-                <a href="javascript:;" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="Send Email"><i class="ri-mail-send-line"></i></a>
-                <a href="'.route('garage-owner.repair-order.new', $estimate->estimate_id).'" class="btn btn-soft-warning btn-border btn-icon shadow-none btn-select3" title="Repair Order"><i class="ri-tools-line"></i></a>
-                <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>'
-            )
+            ->addColumn('action', function ($estimate) {
+                if( $estimate->estimate_carOwnerApproval == "approved" )
+                {
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none disabled" title="Edit"><i class="ri-edit-line"></i></a>
+                    <a href="javascript:;" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="Send Email"><i class="ri-mail-send-line"></i></a>
+                    <a href="'.route('garage-owner.repair-order.new', $estimate->estimate_id).'" class="btn btn-soft-warning btn-border btn-icon shadow-none btn-select3" title="Repair Order"><i class="ri-tools-line"></i></a>
+                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none disabled" title="Archive"><i class="ri-archive-2-line"></i></button>';
+                }
+                else{
+                    return '<a href="'.route('garage-owner.estimate.edit', $estimate->estimate_id).'" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></a>
+                    <a href="javascript:;" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="Send Email"><i class="ri-mail-send-line"></i></a>
+                    <a href="javascript:void(0);" class="btn btn-soft-warning btn-border btn-icon shadow-none btn-select3 disabled" title="Repair Order"><i class="ri-tools-line"></i></a>
+                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>';
+                }
+            })
             ->rawColumns(['estimate_carOwnerApproval', 'action'])
             ->make(true);
     }
@@ -280,6 +292,159 @@ class EstimateController extends Controller
                                     ->orderBy('product_name', 'asc')
                                     ->get();
 
-        return view('garage-owner.estimate.edit', compact('estimate_data', 'labour_data', 'product_data', 'product_list'));
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
+        return view('garage-owner.estimate.edit', compact('estimate_data', 'labour_data', 'product_data', 'product_list', 'setting_data'));
+    }
+
+    public function getProductData(Request $request)
+    {
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $data = $request->all();
+
+        $productData = ProductModel::whereNull('deleted_at')
+                                        ->findOrFail($data['productId']);
+
+        //echo "<pre>"; print_r($productData); die;
+
+        if($productData )
+        {
+            $invoice_data = array(
+                "product_id"    =>  $productData->product_id,
+                "product_name"  =>  $productData->product_name,
+                "product_price" =>  $productData->product_price,
+            );
+            return response()->json(['status' => 'success', 'data' => $invoice_data]);
+        }
+        else
+        {
+            return response()->json(['status' => 'false', 'data' => array()]);
+        }
+    }
+
+    public function update(Request $request)
+    {
+        $garage_Owner = Auth::user();
+
+        //echo "<pre>"; print_r($request->all()); die;
+
+        $validator = Validator::make($request->all(), [
+            'txtestimatedate'               => 'required|string|max:30',
+            'txtsumtotallabour'             => 'required|string|max:50',
+            'txtsumtotalparts'              => 'required|string|max:50',
+            'txtsumtotaltax'                => 'required|string|max:50',
+            'txtsumtotaldueamountexcepttax' => 'required|string|max:50',
+            'txtsumtotaldueamount'          => 'required|string|max:50',
+            'txtbookingid'                  => 'required|string|max:50',
+            'txtcustomerid'                 => 'required|string|max:50',
+            'txtvehicleid'                  => 'required|string|max:50',
+            'txtestimateid'                 => 'required|string|max:50',
+            'txtestimatestatus'             => 'required|string|max:50'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()]);
+        }
+
+        DB::beginTransaction(); // ✅ Begin transaction
+
+        try {
+
+            $updateEstimate = EstimateModel::where('estimate_garage_id', $garage_Owner->id)
+                                            ->where('estimate_id', $request->txtestimateid)
+                                            ->firstOrFail();
+            //echo "<pre>"; print_r($updateEstimate); die;
+            // Store booking record
+
+            $updateEstimate->estimate_booking_id          =   $request->txtbookingid;
+            $updateEstimate->estimate_garage_id           =   $garage_Owner->id;
+            $updateEstimate->estimate_customer_id         =   $request->txtcustomerid;
+            $updateEstimate->estimate_vehicle_id          =   $request->txtvehicleid;
+            $updateEstimate->estimate_date                =   date("Y-m-d", strtotime($request->txtestimatedate));
+            $updateEstimate->estimate_labor_total         =   $request->txtsumtotallabour;
+            $updateEstimate->estimate_parts_total         =   $request->txtsumtotalparts;
+            $updateEstimate->estimate_tax                 =   $request->txtsumtotaltax;
+            $updateEstimate->estimate_total               =   $request->txtsumtotaldueamountexcepttax;
+            $updateEstimate->estimate_total_inctax        =   $request->txtsumtotaldueamount;
+            $updateEstimate->estimate_carOwnerApproval    =   $request->txtestimatestatus;
+            $updateEstimate->estimate_status              =   "1";
+            $updateEstimate->save();
+
+            EstimateLaborModel::where('estimate_labor_estimate_id', $updateEstimate->estimate_id)
+                                ->where('estimate_labor_reference_id', "1")
+                                ->where('estimate_labor_reference_type', "1")
+                                ->delete();
+
+            // Store related labor items
+            $labourIds      = $request->txtlabourname;
+            $laborhours     = $request->txtlabourhours;
+            $laborcost      = $request->txtlabourcost;
+            $labortotalcost = $request->txttotallabourcust;
+            $labortax       = $request->txtlabourtax;
+            $laborgrandtotal= $request->txtlabourtotal;
+
+            foreach ($labourIds as $index => $labourtitle) {
+                $labor = new EstimateLaborModel();
+                $labor->estimate_labor_estimate_id      = $updateEstimate->estimate_id;
+                $labor->estimate_labor_reference_id     = "1";
+                $labor->estimate_labor_reference_type   = "1";
+                $labor->estimate_labor_item             = $labourtitle;
+                $labor->estimate_labor_rate             = $laborcost[$index];
+                $labor->estimate_labor_hours            = $laborhours[$index];
+                $labor->estimate_labor_cost             = $labortotalcost[$index];
+                $labor->estimate_labor_tax              = $labortax[$index];
+                $labor->estimate_labor_total            = $laborgrandtotal[$index];
+                $labor->estimate_labor_status           = "1";
+                $labor->save();
+            }
+
+            EstimatePartsModel::where('estimate_parts_estimate_id', $updateEstimate->estimate_id)
+                                ->where('estimate_parts_reference_id', "1")
+                                ->where('estimate_parts_reference_type', "1")
+                                ->delete();
+
+            // Store related product items
+            $productIds     = $request->txtproductname;
+            $productqty     = $request->txtproductqty;
+            $productprice   = $request->txtproductprice;
+            $productmarkup  = $request->txtproductcost;
+            $producttax     = $request->txtproducttax;
+            $producttotal   = $request->txtproducttotalprice;
+            $producttitle   = $request->txtproducttitle;
+
+            foreach ($productIds as $index => $productid) {
+                $product = new EstimatePartsModel();
+                $product->estimate_parts_estimate_id    = $updateEstimate->estimate_id;
+                $product->estimate_parts_reference_id   = "1";
+                $product->estimate_parts_reference_type = "1";
+                $product->estimate_parts_product_id     = $productid;
+                $product->estimate_parts_product_name   = $producttitle[$index];
+                $product->estimate_parts_quantity       = $productqty[$index];
+                $product->estimate_parts_cost           = $productprice[$index];
+                $product->estimate_parts_markup         = $productmarkup[$index];
+                $product->estimate_parts_tax            = $producttax[$index];
+                $product->estimate_parts_total          = $producttotal[$index];
+                $product->estimate_parts_status         = "1";
+                $product->save();
+            }
+
+            DB::commit(); // ✅ Commit transaction
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Booking Estimate updated successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ Rollback on error
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while saving data.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }

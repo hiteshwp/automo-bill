@@ -93,12 +93,19 @@
                     </div><!--end col-->
                     <div class="col-lg-12">
                         <div class="card-body p-3 ps-0 pe-0 border-top border-top-dashed">
+                             @php
+                                $phone = "N/A";
+                                if($setting_data->setting_phone_number)
+                                {
+                                    $phone = "+".$setting_data->setting_countrycode. " " .$setting_data->setting_phone_number;
+                                }
+                            @endphp
                             <div class="row g-3">
                                 <div class="col-6">
-                                    <h6 class="text-muted text-uppercase fw-semibold mb-3">John Doe Corporation</h6>
-                                    <p class="text-muted mb-1"><span>Address: </span><span id="address">General Palace, Comman Street, VA</span></p>
-                                    <p class="text-muted mb-1"><span>Email: </span><span id="email">support.jdc@mailinator.com</span> </p>
-                                    <p class="text-muted mb-1"><span>Phone: </span><span id="phone-no">(859)-678-9645</span></p>
+                                    <h6 class="text-muted text-uppercase fw-semibold mb-3">{{ $setting_data->setting_system_name ?? "N/A" }}</h6>
+                                    <p class="text-muted mb-1"><span>Address: </span><span id="address">{{ $setting_data->setting_address ?? "N/A" }}</span></p>
+                                    <p class="text-muted mb-1"><span>Email: </span><span id="email">{{ $setting_data->setting_email ?? "N/A" }}</span> </p>
+                                    <p class="text-muted mb-1"><span>Phone: </span><span id="phone-no">{{ $phone }}</span></p>
                                 </div>
                                 <!--end col-->
                                 <div class="col-6">

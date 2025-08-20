@@ -106,7 +106,7 @@
                                         <div class="col-12 col-md-4">
                                             <div class="mb-3">
                                                 <label for="website" class="form-label">Website</label>
-                                                <input type="text" class="form-control" id="website" name="website" placeholder="Enter your website" value="{{ old('mobilenumber') }}" required>
+                                                <input type="text" class="form-control" id="website" name="website" placeholder="Enter your website" value="{{ old('website') }}" required>
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4">

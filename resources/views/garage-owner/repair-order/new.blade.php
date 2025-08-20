@@ -37,13 +37,19 @@
                                                 <img src="{{ asset('assets/images/logo-dark.png') }}" class="card-logo card-logo-dark" alt="logo dark" height="40">
                                                 <img src="{{ asset('assets/images/logo-light.png') }}" class="card-logo card-logo-light" alt="logo light" height="40">
                                             </div>
+                                            @php
+                                                $phone = "N/A";
+                                                if($setting_data->setting_phone_number)
+                                                {
+                                                    $phone = "+".$setting_data->setting_countrycode. " " .$setting_data->setting_phone_number;
+                                                }
+                                            @endphp
                                             <div class="flex-shrink-0 mt-sm-0 mt-3">
-                                                <h6><span>John Doe Corporation</span></h6>
-                                                <h6><span>Man Machine Works</span></h6>
-                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> General Palace, Comman Street, VA</span></h6>
-                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> (859)-678-9645</span></h6>
-                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">support.jdc@mailinator.com</span></h6>
-                                                
+                                                <h6><span>{{ $setting_data->setting_system_name ?? "N/A" }}</span></h6>
+                                                <h6><span>{{ $setting_data->setting_tag_line ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> {{ $setting_data->setting_address ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> {{ $phone }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">{{ $setting_data->setting_email ?? "N/A" }}</span></h6>
                                             </div>
                                         </div>
                                     </div>
@@ -235,7 +241,7 @@
                                                 <div class="formgroup">
                                                     <select class="form-select" aria-label="Default select example" required="" name="txtrepairorderstatus">
                                                         <option value="">Select Client Approval status</option>
-                                                        <option value="1">Panding</option>
+                                                        <option value="1">Pending</option>
                                                         <option value="2">Done</option>
                                                         <option value="3">Not Done</option>
                                                         <option value="4">Update Estimation Again Request!</option>

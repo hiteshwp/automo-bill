@@ -3,57 +3,28 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class TestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct($body = 'Hello from Laravel!')
+    public $subjectText;
+    public $body;
+
+    public function __construct($subjectText, $body)
     {
+        $this->subjectText = $subjectText;
         $this->body = $body;
     }
 
     public function build()
     {
-        return $this->subject('Laravel Gmail SMTP test')
-                    ->markdown('emails.test', ['body' => $this->body]);
-    }
-
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Test Mail',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            markdown: 'emails.test',
-        );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
+        return $this->subject($this->subjectText)
+                    ->markdown('emails.test')
+                    ->with([
+                        'body' => $this->body,
+                    ]);
     }
 }
