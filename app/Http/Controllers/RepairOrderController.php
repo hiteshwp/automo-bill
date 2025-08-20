@@ -17,6 +17,7 @@ use App\Models\EstimateLaborModel;
 use App\Models\EstimatePartsModel;
 use App\Models\RepairOrderModel;
 use App\Models\InvoiceModel;
+use App\Models\SettingModel;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -64,9 +65,11 @@ class RepairOrderController extends Controller
                                             ->where("estimate_parts_estimate_id", $id)
                                             ->get();
 
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
         //echo '<pre>'; print_r($estimate_data); die;
 
-        return view('garage-owner.repair-order.new', compact('estimate_data', 'labour_data', 'product_data', 'total_hours'));
+        return view('garage-owner.repair-order.new', compact('estimate_data', 'labour_data', 'product_data', 'total_hours', 'setting_data'));
     }
 
     public function store(Request $request)
@@ -228,12 +231,23 @@ class RepairOrderController extends Controller
                     return '<span class="text-info">Update Estimation Again Request!</span>';
                 }
             })
-            ->addColumn('action', fn($repair_order) =>
-                '<button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none btn-select3" title="Edit" data-bs-toggle="offcanvas" data-bs-target="#sidebarEditRepairOrder" aria-controls="offcanvasRight"><i class="ri-edit-line"></i></button>
-                <a href="javascript:void(0);" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="View TimeLog" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewTimeLog" aria-controls="offcanvasRight"><i class="ri-time-line"></i></a>
-                <a href="'.route('garage-owner.invoice.new', $repair_order->repairorder_id).'" class="btn btn-soft-info btn-border btn-icon shadow-none" title="One Click Invoice"><i class="ri-file-paper-2-line"></i></a>
-                <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>'
-            )
+            ->addColumn('action', function ($repair_order) {
+
+                if( $repair_order->repairorder_status == "2" )
+                {
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none btn-select3 disabled" title="Edit"><i class="ri-edit-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="View TimeLog" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewTimeLog" aria-controls="offcanvasRight"><i class="ri-time-line"></i></a>
+                            <a href="'.route('garage-owner.invoice.new', $repair_order->repairorder_id).'" class="btn btn-soft-info btn-border btn-icon shadow-none" title="One Click Invoice"><i class="ri-file-paper-2-line"></i></a>
+                            <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none disabled" title="Archive"><i class="ri-archive-2-line"></i></button>';
+                }
+                else
+                {   
+                    return '<a href="'.route('garage-owner.repair-order.edit', $repair_order->repairorder_id).'" class="btn btn-soft-success btn-border btn-icon shadow-none btn-select3" title="Edit"><i class="ri-edit-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="View TimeLog" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewTimeLog" aria-controls="offcanvasRight"><i class="ri-time-line"></i></a>
+                            <a href="" class="btn btn-soft-info btn-border btn-icon shadow-none disabled" title="One Click Invoice"><i class="ri-file-paper-2-line"></i></a>
+                            <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Archive"><i class="ri-archive-2-line"></i></button>';
+                }
+            })
             ->rawColumns(['repaiorder_clock_in', 'repaiorder_clock_out', 'repairorder_status', 'action'])
             ->make(true);
     }
@@ -278,6 +292,85 @@ class RepairOrderController extends Controller
         $total_hours = EstimateLaborModel::where("estimate_labor_estimate_id", $id)
                                         ->sum('estimate_labor_hours');
 
-        return view('garage-owner.repair-order.edit', compact('repair_order_data', 'labour_data', 'product_data', 'total_hours'));
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
+        return view('garage-owner.repair-order.edit', compact('repair_order_data', 'labour_data', 'product_data', 'total_hours', 'setting_data'));
+    }
+
+    public function update(Request $request)
+    {
+        $garage_Owner = Auth::user();
+
+        //echo "<pre>"; print_r($request->all()); die;
+
+        $validator = Validator::make($request->all(), [
+            'txtemployeename'       => 'required|string|max:250',
+            'txtemployeeemail'      => 'required|string|max:250',
+            'txtemployeephone'      => 'required|string|max:20',
+            'txtrepairorderdate'    => 'required|string|max:20',
+            'txtrepairorderstatus'  => 'required|string|max:10',
+            'txtbookingid'          => 'required|string|max:10',
+            'txtestimateid'         => 'required|string|max:10',
+            'txtgarageid'           => 'required|string|max:10',
+            'txtcustomerid'         => 'required|string|max:10',
+            'txtvehicleid'          => 'required|string|max:10',
+            'txtextranotes'         => 'nullable',
+            'txttotalparts'         => 'required|string|max:30',
+            'txttotalamount'        => 'required|string|max:30',
+            'txtrepairorderid'      => 'required|string|max:30',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()]);
+        }
+
+        DB::beginTransaction(); // ✅ Begin transaction
+
+        try {
+            
+            $updateRepairOrder = RepairOrderModel::where('repairorder_garage_id', $garage_Owner->id)
+                                            ->where('repairorder_id', $request->txtrepairorderid)
+                                            ->firstOrFail();
+
+            // Store booking record
+            $updateRepairOrder->repairorder_booking_id        = $request->txtbookingid;
+            $updateRepairOrder->repairorder_estimate_id       = $request->txtestimateid;
+            $updateRepairOrder->repairorder_garage_id         = $garage_Owner->id;
+            $updateRepairOrder->repairorder_customer_id       = $request->txtcustomerid;
+            $updateRepairOrder->repairorder_vehicle_id        = $request->txtvehicleid;
+            $updateRepairOrder->repairorder_order_date        = $request->txtrepairorderdate;
+            $updateRepairOrder->repairorder_notes             = $request->txtextranotes;
+            $updateRepairOrder->repairorder_labor_total       = $request->txttotalamount;
+            $updateRepairOrder->repairorder_parts_total       = $request->txttotalparts;  
+            $updateRepairOrder->repairorder_garage_employee   = $request->txtemployeename;  
+            $updateRepairOrder->repairorder_employee_email    = $request->txtemployeeemail;  
+            $updateRepairOrder->repairorder_employee_phone    = $request->txtemployeephone;  
+            $updateRepairOrder->repairorder_amount            = $request->txtrepairorderstatus;  
+            $updateRepairOrder->repairorder_status            = $request->txtrepairorderstatus;  
+            
+            // if( $request->txtbookingservice )
+            // {
+            //     $repairOrder->booking_is_service = "1";
+            // }
+            
+
+            $updateRepairOrder->save();
+
+            DB::commit(); // ✅ Commit transaction
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Repair Order data Updated successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ Rollback on error
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while saving data.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }

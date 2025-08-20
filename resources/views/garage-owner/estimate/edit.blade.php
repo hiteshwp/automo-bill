@@ -9,7 +9,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="page-title-box p-0 d-sm-flex align-items-center justify-content-between">
-                            <h4 class="mb-sm-0 d-flex align-items-center gap-2"><a href="{{ route('garage-owner.estimate.list') }}" class="btn btn-soft-primary btn-icon shadow-none"><i class="ri-arrow-left-line"></i></a> Update Estimate - <span class="fs-14 fw-normal">({{ $estimate_data->client_name }})</span></h4>
+                            <h4 class="mb-sm-0 d-flex align-items-center gap-2"><a href="{{ route('garage-owner.booking.list') }}" class="btn btn-soft-primary btn-icon shadow-none"><i class="ri-arrow-left-line"></i></a> Update Estimate - <span class="fs-14 fw-normal">({{ $estimate_data->client_name }})</span></h4>
                             <div class="page-title-action-list d-flex gap-2">
                                 <div class="page-title-action-item">
                                     <a href="{{ route('garage-owner.booking.list') }}" class="btn btn-primary btn-select2"><i class="ri-add-large-line"></i> New Booking</a>
@@ -45,12 +45,19 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            @php
+                                                $phone = "N/A";
+                                                if($setting_data->setting_phone_number)
+                                                {
+                                                    $phone = "+".$setting_data->setting_countrycode. " " .$setting_data->setting_phone_number;
+                                                }
+                                            @endphp
                                             <div class="flex-shrink-0 mt-sm-0 mt-3">
-                                                <h6><span>John Doe Corporation</span></h6>
-                                                <h6><span>Man Machine Works</span></h6>
-                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> General Palace, Comman Street, VA</span></h6>
-                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> (859)-678-9645</span></h6>
-                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">support.jdc@mailinator.com</span></h6>
+                                                <h6><span>{{ $setting_data->setting_system_name ?? "N/A" }}</span></h6>
+                                                <h6><span>{{ $setting_data->setting_tag_line ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> {{ $setting_data->setting_address ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> {{ $phone }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">{{ $setting_data->setting_email ?? "N/A" }}</span></h6>
                                             </div>
                                         </div>
                                     </div>
@@ -120,9 +127,9 @@
                                                                     <div class="formgroup">
                                                                         <select class="form-select rate" name="txtlabourcost[]">
                                                                             <option>Cost</option>
-                                                                            <option value="60" {{ $labour_data_list->estimate_labor_rate == "60" ? 'selected' : '' }}>60</option>
-                                                                            <option value="40" {{ $labour_data_list->estimate_labor_rate == "40" ? 'selected' : '' }}>40</option>
-                                                                            <option value="80" {{ $labour_data_list->estimate_labor_rate == "80" ? 'selected' : '' }}>80</option>
+                                                                            <option value="{{ $setting_data->setting_labor_1 }}" {{ $labour_data_list->estimate_labor_rate == $setting_data->setting_labor_1 ? 'selected' : '' }}>{{ $setting_data->setting_labor_1 }}</option>
+                                                                            <option value="{{ $setting_data->setting_labor_2 }}" {{ $labour_data_list->estimate_labor_rate == $setting_data->setting_labor_2 ? 'selected' : '' }}>{{ $setting_data->setting_labor_2 }}</option>
+                                                                            <option value="{{ $setting_data->setting_labor_3 }}" {{ $labour_data_list->estimate_labor_rate == $setting_data->setting_labor_3 ? 'selected' : '' }}>{{ $setting_data->setting_labor_3 }}</option>
                                                                         </select>
                                                                     </div>
                                                                 </td>
@@ -135,9 +142,9 @@
                                                                     <div class="formgroup">
                                                                         <select class="form-select tax" name="txtlabourtax[]">
                                                                             <option>None</option>
-                                                                            <option value="10" {{ $labour_data_list->estimate_labor_tax == "10" ? 'selected' : '' }}>10</option>
-                                                                            <option value="13" {{ $labour_data_list->estimate_labor_tax == "13" ? 'selected' : '' }}>13</option>
-                                                                            <option value="15" {{ $labour_data_list->estimate_labor_tax == "15" ? 'selected' : '' }}>15</option>
+                                                                            <option value="{{ $setting_data->setting_tax_1 }}" {{ $labour_data_list->estimate_labor_tax == $setting_data->setting_tax_1 ? 'selected' : '' }}>{{ $setting_data->setting_tax_1 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_2 }}" {{ $labour_data_list->estimate_labor_tax == $setting_data->setting_tax_2 ? 'selected' : '' }}>{{ $setting_data->setting_tax_2 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_3 }}" {{ $labour_data_list->estimate_labor_tax == $setting_data->setting_tax_3 ? 'selected' : '' }}>{{ $setting_data->setting_tax_3 }}</option>
                                                                         </select>
                                                                     </div>
                                                                 </td>
@@ -186,7 +193,7 @@
                                                                 <td>
                                                                     <div class="formgroup">
                                                                         <select class="form-select product-select" name="txtproductname[]">
-                                                                            <option>Select Any Item</option>
+                                                                            <option value="">Select Any Item</option>
                                                                             @foreach($product_list as $productlist)
                                                                             <option value="{{ $productlist->product_id }}" {{ $product_data_list->estimate_parts_product_id == $productlist->product_id ? 'selected' : '' }}>
                                                                                 {{ $productlist->product_name }}
@@ -218,9 +225,9 @@
                                                                     <div class="formgroup">
                                                                         <select class="form-select product-tax" name="txtproducttax[]">
                                                                             <option value="">None</option>
-                                                                            <option value="10" {{ $product_data_list->estimate_parts_tax == "10" ? 'selected' : '' }}>10</option>
-                                                                            <option value="13" {{ $product_data_list->estimate_parts_tax == "13" ? 'selected' : '' }}>13</option>
-                                                                            <option value="15" {{ $product_data_list->estimate_parts_tax == "15" ? 'selected' : '' }}>15</option>
+                                                                            <option value="{{ $setting_data->setting_tax_1 }}" {{ $product_data_list->estimate_parts_tax == $setting_data->setting_tax_1 ? 'selected' : '' }}>{{ $setting_data->setting_tax_1 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_2 }}" {{ $product_data_list->estimate_parts_tax == $setting_data->setting_tax_2 ? 'selected' : '' }}>{{ $setting_data->setting_tax_2 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_3 }}" {{ $product_data_list->estimate_parts_tax == $setting_data->setting_tax_3 ? 'selected' : '' }}>{{ $setting_data->setting_tax_3 }}</option>
                                                                         </select>
                                                                     </div>
                                                                 </td>
@@ -286,7 +293,18 @@
                                                 <input class="form-check-input" type="checkbox" id="estimate" checked />
                                                 <label class="form-check-label" for="estimate">Select to send Estimate to client.</label>
                                             </div>
-                                            <button type="submit" class="btn btn-success" id="btnnewestimate">Update</button>
+                                            <div class="formgroup form-check ps-0">
+                                                <div class="formgroup">
+                                                    <select class="form-select pe-5" aria-label="Default select example" required="" name="txtestimatestatus">
+                                                        <option value="pending" {{ $estimate_data->estimate_carOwnerApproval == "pending" ? 'selected' : '' }}>Pending</option>
+                                                        <option value="approved" {{ $estimate_data->estimate_carOwnerApproval == "approved" ? 'selected' : '' }}>Approved</option>
+                                                        <option value="rejected" {{ $estimate_data->estimate_carOwnerApproval == "rejected" ? 'selected' : '' }}>Rejected</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            @if ( $estimate_data->estimate_carOwnerApproval != "approved" )
+                                                <button type="submit" class="btn btn-success" id="btnupdateestimate">Update</button>
+                                            @endif
                                             <input type="hidden" name="txtsumtotallabour" id="txtsumtotallabour" value="{{ $estimate_data->estimate_labor_total }}"/>
                                             <input type="hidden" name="txtsumtotalparts" id="txtsumtotalparts" value="{{ $estimate_data->estimate_parts_total }}"/>
                                             <input type="hidden" name="txtsumtotaltax" id="txtsumtotaltax" value="{{ $estimate_data->estimate_tax }}"/>
@@ -295,6 +313,7 @@
                                             <input type="hidden" name="txtbookingid" id="txtbookingid" value="{{ $estimate_data->estimate_booking_id }}"/>
                                             <input type="hidden" name="txtcustomerid" id="txtcustomerid" value="{{ $estimate_data->estimate_customer_id }}"/>
                                             <input type="hidden" name="txtvehicleid" id="txtvehicleid" value="{{ $estimate_data->estimate_vehicle_id }}"/>
+                                            <input type="hidden" name="txtestimateid" id="txtestimateid" value="{{ $estimate_data->estimate_id }}"/>
                                         </div>
                                     </div>
                                 </form>

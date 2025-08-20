@@ -113,10 +113,17 @@
                     </div>
                     <div class="card-body">
                         <form id="frmcompanysetting" method="post">
+                            @php
+                                $image_path = "";
+                                if(optional($setting_data)->setting_logo_image)
+                                {
+                                    $image_path = asset('uploads/company/')."/".optional($setting_data)->setting_logo_image;
+                                }
+                            @endphp
                             <div class="row">
                                 <div class="col-12 col-md-4 col-lg-4">
                                     <div class="formgroup mb-3">
-                                        <label class="form-label" for="txtcompanylogo" id="companysettingimage" data-imagepath="{{ asset('uploads/company/') }}/{{ optional($setting_data)->setting_logo_image ?? '' }}">Logo*</label>
+                                        <label class="form-label" for="txtcompanylogo" id="companysettingimage" data-imagepath="{{ $image_path }}">Logo*</label>
                                         <div class="avatar-xl">
                                             <input type="file" class="filepond filepond-input-circle companysettingimg" name="filepond" accept="image/png, image/jpeg, image/gif" />
                                         </div>                                    
@@ -142,11 +149,17 @@
                                         <textarea type="text" class="form-control resize-none" rows="1" id="txtbusinessaddress" required placeholder="Enter business address" name="txtbusinessaddress">{{ optional($setting_data)->setting_address ?? '' }}</textarea>                                    
                                     </div>
                                 </div>
-
+                                @php
+                                    $phone = "";
+                                    if(optional($setting_data)->setting_phone_number)
+                                    {
+                                        $phone = "+".optional($setting_data)->setting_countrycode.optional($setting_data)->setting_phone_number;
+                                    }
+                                @endphp
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <div class="formgroup mb-3">
                                         <label class="form-label" for="txtcompanyphone">Phone*</label>
-                                        <input class="form-control" id="txtcompanyphone" name="txtcompanyphone" type="tel" value="+{{ optional($setting_data)->setting_countrycode ?? '' }}{{ optional($setting_data)->setting_phone_number ?? '' }}" placeholder="Enter your mobile number" required />    
+                                        <input class="form-control" id="txtcompanyphone" name="txtcompanyphone" type="tel" value="{{ $phone }}" placeholder="Enter your mobile number" required />    
                                         <div id="error-msg-bsp" class="hide"></div>
                                         <div id="valid-msg-bsp" class="hide"></div>
                                         <button id="btn-bsp" style="display:none;">Validate</button>                                
@@ -207,7 +220,12 @@
                         <div class="row">
                             <div class="col-12 col-md-12 col-lg-12 d-flex justify-content-center mt-2">
                                 <div class="formgroup">
-                                    <button type="button" class="btn btn-primary">Link Google Account</button>
+                                    @if(!Auth::User()->google_json_string)
+                                        <a href="{{ route('google.redirect') }}" class="btn btn-primary">Link Google Account</a>
+                                    @else
+                                    <p class="alert alert-success">Google Account Linked</p>
+                                    @endif
+                                    
                                 </div>
                             </div>
                         </div>

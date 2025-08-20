@@ -32,6 +32,7 @@ class BookingModel extends Model
         'booking_google_event_end',
         'booking_is_service',
         'booking_is_covidsafe',
+        'booking_from',
         'created_at',
         'updated_at',
         'deleted_at',

@@ -262,9 +262,6 @@
     </div>
 </div>
 
-<!-- right offcanvas -->
-@include('layouts.explore')
-
 <!-- removeNotificationModal -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="removeClientNotificationModal" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
@@ -289,5 +286,32 @@
         </div>
     </div>
 </div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="generateClientPasswordModal" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasRightLabel">Generate new password</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="viewInformationBlock">
+            <div class="mt-2 text-center">
+                <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                    <h4>Are you sure ?</h4>
+                    <p class="text-muted mx-4 mb-0">Are you sure you want to generate new password ?</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                <form method="post">
+                    <input type="hidden" value="" id="txtclientid"/>
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="offcanvas">Close</button>
+                    <button type="button" class="btn w-sm btn-danger" id="generate-client-password">Yes, Generate It!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- right offcanvas -->
+@include('layouts.explore')
 
 @endsection

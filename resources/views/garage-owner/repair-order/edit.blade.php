@@ -28,7 +28,7 @@
             <div class="col-12 col-md-12 col-lg-12">
                 <div class="card" id="demo">
                     <div class="card-body">
-                        <form method="post" id="frmnewrepairorderinformation">
+                        <form method="post" id="frmeditrepairorderinformation">
                             <div class="row justify-content-center">
                                 <div class="col-12 col-md-8 col-lg-9">
                                     <div class="card-header border-bottom-dashed py-4 px-0">
@@ -37,13 +37,19 @@
                                                 <img src="{{ asset('assets/images/logo-dark.png') }}" class="card-logo card-logo-dark" alt="logo dark" height="40">
                                                 <img src="{{ asset('assets/images/logo-light.png') }}" class="card-logo card-logo-light" alt="logo light" height="40">
                                             </div>
+                                            @php
+                                                $phone = "N/A";
+                                                if($setting_data->setting_phone_number)
+                                                {
+                                                    $phone = "+".$setting_data->setting_countrycode. " " .$setting_data->setting_phone_number;
+                                                }
+                                            @endphp
                                             <div class="flex-shrink-0 mt-sm-0 mt-3">
-                                                <h6><span>John Doe Corporation</span></h6>
-                                                <h6><span>Man Machine Works</span></h6>
-                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> General Palace, Comman Street, VA</span></h6>
-                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> (859)-678-9645</span></h6>
-                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">support.jdc@mailinator.com</span></h6>
-                                                
+                                                <h6><span>{{ $setting_data->setting_system_name ?? "N/A" }}</span></h6>
+                                                <h6><span>{{ $setting_data->setting_tag_line ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> {{ $setting_data->setting_address ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> {{ $phone }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">{{ $setting_data->setting_email ?? "N/A" }}</span></h6>
                                             </div>
                                         </div>
                                     </div>
@@ -218,14 +224,16 @@
                                                 <div class="formgroup">
                                                     <select class="form-select" aria-label="Default select example" required="" name="txtrepairorderstatus">
                                                         <option value="">Select Client Approval status</option>
-                                                        <option value="1" {{ $repair_order_data->repairorder_status == "1" ? 'selected' : '' }}>Panding</option>
+                                                        <option value="1" {{ $repair_order_data->repairorder_status == "1" ? 'selected' : '' }}>Pending</option>
                                                         <option value="2" {{ $repair_order_data->repairorder_status == "2" ? 'selected' : '' }}>Done</option>
                                                         <option value="3" {{ $repair_order_data->repairorder_status == "3" ? 'selected' : '' }}>Not Done</option>
                                                         <option value="4" {{ $repair_order_data->repairorder_status == "4" ? 'selected' : '' }}>Update Estimation Again Request!</option>
                                                     </select>
                                                 </div>
                                             </div>
-                                            <input type="submit" class="btn btn-success" value="Update" id="btncreaterepairorder">
+                                            @if ( $repair_order_data->repairorder_status != "2" )
+                                                <input type="submit" class="btn btn-success" value="Update" id="btnupdaterepairorder">
+                                            @endif
                                             <input type="hidden" name="txtbookingid" value="{{ $repair_order_data->repairorder_booking_id }}" />
                                             <input type="hidden" name="txtestimateid" value="{{ $repair_order_data->repairorder_estimate_id }}" />
                                             <input type="hidden" name="txtgarageid" value="{{ $repair_order_data->repairorder_garage_id }}" />
@@ -233,6 +241,7 @@
                                             <input type="hidden" name="txtvehicleid" value="{{ $repair_order_data->repairorder_vehicle_id }}" />
                                             <input type="hidden" name="txttotalparts" value="{{ $repair_order_data->repairorder_parts_total }}" />
                                             <input type="hidden" name="txttotalamount" value="{{ $repair_order_data->estimate_total_inctax }}" />
+                                            <input type="hidden" name="txtrepairorderid" value="{{ $repair_order_data->repairorder_id }}" />
                                         </div>
                                     </div>
                                 </div><!--end col-->

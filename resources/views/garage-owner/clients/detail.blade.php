@@ -12,9 +12,6 @@
                             <h4 class="mb-sm-0 d-flex align-items-center gap-2"><a href="{{ url()->previous() }}" class="btn btn-soft-primary btn-icon shadow-none"><i class="ri-arrow-left-line"></i></a> View Details - <span class="fs-14 fw-normal">({{ $clientDetails->name }})</span></h4>
                             <div class="page-title-action-list d-flex gap-2">
                                 <div class="page-title-action-item">
-                                    <a href="add-invoice.html" class="btn btn-warning">New Invoice</a>
-                                </div>
-                                <div class="page-title-action-item">
                                     <button type="button" class="btn btn-success btn-select2" data-bs-toggle="offcanvas" data-bs-target="#sidebarNewClient" aria-controls="offcanvasRight"><i class="ri-add-large-line"></i> New Client</button>
                                 </div>
                                 <div class="page-title-action-item">
@@ -70,66 +67,65 @@
                         <h4 class="card-title mb-0 flex-grow-1">Client Details</h4>
                         <div class="card-header-action-block d-flex flex-wrap gap-2">
                             <div class="formgroup select-vehicle-dropdown">
-                                <select class="common-single-select" name="vehicle">
-                                    <option>Select vehicle</option>
-                                    <option value="">Ferrari</option>
-                                    <option value="">BMW</option>
-                                    <option value="">KIA</option>
+                                <select class="common-single-select" name="vehicle" id="vehiclelisting">
+                                    @foreach ($vehicleList as $vehicle_lists )
+                                        <option value="{{ $vehicle_lists->id }}###{{ $vehicleClientDetails->id }}">{{ $vehicle_lists->modelbrand. " " .$vehicle_lists->modelyear }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <a href="#" class="btn btn-soft-success shadow-none"><i class="ri-add-large-line"></i> Add Another Vehicle</a>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" id="clientvehicledetailcontainer">
                         <div class="am-info-list-block">
                             <ul class="am-info-list">
                                 <li class="am-info-item">
                                     <span class="info-list-title">Selected Vehicle</span>
-                                    <span class="info-list-value">Ferrari 2023</span>
+                                    <span class="info-list-value clientvehicleselecedvehicle">{{ $vehicleClientDetails->modelbrand ?? "N/A" }} {{ $vehicleClientDetails->modelyear }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Licence Plate</span>
-                                    <span class="info-list-value">CHJK247</span>
+                                    <span class="info-list-value clientvehiclelicenceplate">{{ $vehicleClientDetails->number_plate ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">VIN</span>
-                                    <span class="info-list-value">AEPLK123456789123</span>
+                                    <span class="info-list-value clientvehiclevin">{{ $vehicleClientDetails->vin ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Client ID</span>
-                                    <span class="info-list-value">2</span>
+                                    <span class="info-list-value clientvehicleclientid">{{ $vehicleClientDetails->id ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Name</span>
-                                    <span class="info-list-value">Chirag Kanjariya</span>
+                                    <span class="info-list-value clientvehicleclientname">{{ $vehicleClientDetails->name ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Make</span>
-                                    <span class="info-list-value">Ferrari</span>
+                                    <span class="info-list-value clientvehiclemake">{{ $vehicleClientDetails->modelbrand ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Model</span>
-                                    <span class="info-list-value">Ferrari</span>
+                                    <span class="info-list-value clientvehiclemodel">{{ $vehicleClientDetails->modelname ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Year</span>
-                                    <span class="info-list-value">2023</span>
+                                    <span class="info-list-value clientvehicleyear">{{ $vehicleClientDetails->modelyear ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Phone</span>
-                                    <span class="info-list-value">N/A</span>
+                                    <span class="info-list-value clientvehiclephone">N/A</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Mobile</span>
-                                    <span class="info-list-value">+91 9825409350</span>
+                                    <span class="info-list-value clientvehiclemobile">+{{ $vehicleClientDetails->countrycode }} {{ $vehicleClientDetails->mobilenumber ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Address</span>
-                                    <span class="info-list-value">Ahmedabad</span>
+                                    <span class="info-list-value clientvehicleaddress">{{ $vehicleClientDetails->address ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">Email</span>
-                                    <span class="info-list-value">chiragkanjariya14@gmail.com</span>
+                                    <span class="info-list-value clientvehicleemail">{{ $vehicleClientDetails->email ?? "N/A" }}</span>
                                 </li>
                                 <li class="am-info-item">
                                     <span class="info-list-title">CARMD/CARFAX</span>
@@ -266,7 +262,7 @@
                         <div class="alert alert-warning text-center">
                             No Booking Available
                         </div>
-                        <div class="booking-details-info table-block table-responsive">
+                        <!-- <div class="booking-details-info table-block table-responsive">
                             <table class="table table-hover table-bordered">
                                 <tbody>
                                     <tr>
@@ -285,7 +281,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -294,58 +290,46 @@
                     <div class="card-header align-items-center d-flex">
                         <h4 class="card-title mb-0 flex-grow-1">Repair Orders</h4>
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-warning text-center">
-                            No Repair Orders Available
-                        </div>
-                        <div class="booking-details-info table-block table-responsive">
-                            <table class="table table-hover table-bordered">
-                                <thead>
-                                    <th>RO</th>
-                                    <th>Date</th>
-                                    <th>Employee</th>
-                                    <th>Clock In</th>
-                                    <th>Clock Out</th>
-                                    <th>Action</th>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <a href="#" class="link-primary link-offset-2">123456</a>
-                                        </td>
-                                        <td>12-19-2024</td>
-                                        <td>Chirag</td>
-                                        <td>
-                                            <span class="text-success">1</span>
-                                        </td>
-                                        <td>
-                                            <span class="text-danger">2</span>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></button>
-                                            <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Delete"><i class="ri-delete-bin-6-line"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a href="#" class="link-primary link-offset-2">123456</a>
-                                        </td>
-                                        <td>12-19-2024</td>
-                                        <td>Chirag</td>
-                                        <td>
-                                            <span class="text-success">1</span>
-                                        </td>
-                                        <td>
-                                            <span class="text-danger">2</span>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></button>
-                                            <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Delete"><i class="ri-delete-bin-6-line"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="card-body">                        
+                        @if( count($repairOrderData) > 0 )
+                            <div class="booking-details-info table-block table-responsive">
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                        <th>RO</th>
+                                        <th>Date</th>
+                                        <th>Employee</th>
+                                        <th>Clock In</th>
+                                        <th>Clock Out</th>
+                                        <th>Action</th>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ( $repairOrderData as $repairOrderData_list )
+                                            <tr>
+                                                <td>
+                                                    <a href="javascript:void(0)" class="link-primary link-offset-2">{{ $repairOrderData_list->repairorder_order_no }}</a>
+                                                </td>
+                                                <td>{{ $repairOrderData_list->repairorder_order_date }}</td>
+                                                <td>{{ $repairOrderData_list->repairorder_garage_employee }}</td>
+                                                <td>
+                                                    <span class="text-success">1</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-danger">2</span>
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-soft-success btn-border btn-icon shadow-none" title="Edit"><i class="ri-edit-line"></i></button>
+                                                    <button type="button" class="btn btn-soft-danger btn-border btn-icon shadow-none" title="Delete"><i class="ri-delete-bin-6-line"></i></button>
+                                                </td>
+                                            </tr>
+                                        @endforeach                                            
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="alert alert-warning text-center">
+                                No Repair Orders Available
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -355,7 +339,10 @@
                         <h4 class="card-title mb-0 flex-grow-1">Outstanding Invoices</h4>
                     </div>
                     <div class="card-body">
-                        <div class="booking-details-info table-block table-responsive">
+                        <div class="alert alert-warning text-center">
+                            No Outstanding Invoice History
+                        </div>
+                        <!-- <div class="booking-details-info table-block table-responsive">
                             <table class="table table-hover table-bordered">
                                 <thead>
                                     <th>Invoice</th>
@@ -385,7 +372,7 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -398,7 +385,7 @@
                         <div class="alert alert-warning text-center">
                             No transaction & Invoice History
                         </div>
-                        <div class="booking-details-info table-block table-responsive">
+                        <!-- <div class="booking-details-info table-block table-responsive">
                             <table class="table table-hover table-bordered">
                                 <thead>
                                     <th>Transaction</th>
@@ -436,7 +423,7 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -942,88 +929,6 @@
     </div>
 </div>
 
-<!-- right offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarExplore" aria-labelledby="offcanvasRightLabel">
-    <div class="offcanvas-header">
-        <h5 id="offcanvasRightLabel">Explore</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="inner-pages-top-menu-block">
-            <ul class="inner-navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-box-3-line"></i> <span>Suppliers</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-user-search-line"></i> <span>Search Client</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-steering-line"></i> <span>Search Vehicle</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-file-info-line"></i> <span>Invoice Due</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-file-check-line"></i> <span>Paid Invoices</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link dropdownToggleMenuLink" data-bs-toggle="collapse" href="#dropdownToggleMenu" role="button" aria-expanded="true" aria-controls="collapseExample">
-                        <i class="ri-file-text-line"></i> <span>Part Inventory</span>
-                    </a>
-                    <div class="collapse" id="dropdownToggleMenu">
-                        <div class="dropdown-toggle-menu">
-                            <ul class="nav nav-sm">
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Suppliers | Email | Order Part</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Product</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Purchase</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Stock</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-file-chart-line"></i> <span>Sales Reports</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-file-upload-line"></i> <span>Import</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-coupon-3-line"></i> <span>Manage Tickets</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-megaphone-line"></i> <span>Marketing</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
 <!-- removeNotificationModal -->
 <div id="removeNotificationModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1047,4 +952,7 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+@include('layouts.explore')
+
 @endsection

@@ -24,11 +24,14 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         if ($user->user_type === 'Super Admin') {
-            return redirect()->route('dashboard.super-admin');
+            return redirect()->route('dashboard.super-admin')
+            ->with('status', 'Welcome back, ' . Auth::user()->name . '!');
         } elseif ($user->user_type === 'Garage Owner') {
-            return redirect()->route('dashboard.garage-owner');
+            return redirect()->route('dashboard.garage-owner')
+            ->with('status', 'Welcome back, ' . Auth::user()->name . '!');
         } else {
-            return redirect()->route('dashboard.user');
+            return redirect()->route('dashboard.user')
+            ->with('status', 'Welcome back, ' . Auth::user()->name . '!');
         }
     }
 
@@ -75,17 +78,37 @@ class DashboardController extends Controller
 
     public function userDashboard()
     {
-        return view('dashboard.user');
-    }
 
-    public function sendWelcomeEmail()
-    {
-        $toEmail = 'hitesh.wp@gmail.com'; // where you want to send
-        $messageBody = 'This is test email.';
+        if (!Auth::check()) {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
 
-        Mail::to($toEmail)->send(new TestMail($messageBody));
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
 
-        return 'Email sent successfully!';
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $total_booking = BookingModel::where('booking_customer_id',$user_id)
+                                        ->whereNull('deleted_at')
+                                        ->count();
+
+        $total_repair_order = RepairOrderModel::where('repairorder_customer_id',$user_id)
+                                        ->whereNull('deleted_at')
+                                        ->count();
+
+        $booking_data = BookingModel::select('tbl_booking.*', 'users.name as client_name', 'users.email as client_email', 'tbl_vehicles.number_plate as number_plate')
+                        ->leftJoin('users', 'tbl_booking.booking_customer_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_booking.booking_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->where('tbl_booking.booking_customer_id', $user_id)
+                        ->where('users.user_type', 'User')
+                        ->whereNull('tbl_booking.deleted_at')
+                        ->orderBy('tbl_booking.booking_id', 'desc')
+                        ->limit(5)
+                        ->get();
+
+        return view('dashboard.user', compact('total_booking', 'total_repair_order', 'booking_data'));
     }
 
     public function garageOwnerProfile()
@@ -249,7 +272,5 @@ class DashboardController extends Controller
     
         return response()->json(['status' => 'success', 'message' => 'New Password updated successfully.']);
     }
-
-
 
 }

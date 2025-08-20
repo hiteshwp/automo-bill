@@ -17,6 +17,7 @@ use App\Models\EstimateLaborModel;
 use App\Models\EstimatePartsModel;
 use App\Models\RepairOrderModel;
 use App\Models\InvoiceModel;
+use App\Models\SettingModel;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -69,9 +70,11 @@ class InvoiceController extends Controller
                                     ->orderBy('product_name', 'asc')
                                     ->get();
 
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
         //echo '<pre>'; print_r($repair_order_data); die;
 
-        return view('garage-owner.invoice.new', compact('repair_order_data', 'labour_data', 'product_data', 'product_list'));
+        return view('garage-owner.invoice.new', compact('repair_order_data', 'labour_data', 'product_data', 'product_list', 'setting_data'));
     }
 
     public function store(Request $request)
@@ -201,8 +204,10 @@ class InvoiceController extends Controller
 
         $invoice_data = InvoiceModel::whereNull('tbl_invoices.deleted_at')
                                                 ->get();
+        
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
 
-        return view('garage-owner.invoice.list', compact('invoice_data'));
+        return view('garage-owner.invoice.list', compact('invoice_data', 'setting_data'));
     }
 
     public function getInvoiceData(Request $request)
@@ -346,6 +351,138 @@ class InvoiceController extends Controller
                                     ->orderBy('product_name', 'asc')
                                     ->get();
 
-        return view('garage-owner.invoice.edit', compact('invoice_data', 'labour_data', 'product_data', 'product_list'));
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
+        return view('garage-owner.invoice.edit', compact('invoice_data', 'labour_data', 'product_data', 'product_list', 'setting_data'));
+    }
+
+    public function update(Request $request)
+    {
+        $garage_Owner = Auth::user();
+
+        //echo "<pre>"; print_r($request->all()); die;
+
+        $validator = Validator::make($request->all(), [
+            'txtestimatedate'               => 'required|string|max:30',
+            'txtsumtotallabour'             => 'required|string|max:50',
+            'txtsumtotalparts'              => 'required|string|max:50',
+            'txtsumtotaltax'                => 'required|string|max:50',
+            'txtsumtotaldueamountexcepttax' => 'required|string|max:50',
+            'txtsumtotaldueamount'          => 'required|string|max:50',
+            'txtrepairorderid'              => 'required',
+            'txtbookingid'                  => 'required',
+            'txtcustomerid'                 => 'required',
+            'txtvehicleid'                  => 'required',
+            'txtestimateid'                 => 'required',
+            'txtgarageid'                   => 'required',
+            'txtinvoiceid'                  => 'required'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()]);
+        }
+
+        DB::beginTransaction(); // ✅ Begin transaction
+
+        try {
+
+            $updateInvoice = InvoiceModel::where('invoice_garage_id', $garage_Owner->id)
+                                            ->where('invoice_id', $request->txtinvoiceid)
+                                            ->firstOrFail();
+
+            // Store booking record
+            $updateInvoice->invoice_repairorder_id      =   $request->txtrepairorderid;
+            $updateInvoice->invoice_estimate_id         =   $request->txtestimateid;
+            $updateInvoice->invoice_booking_id          =   $request->txtbookingid;
+            $updateInvoice->invoice_type                =   "Booking";
+            $updateInvoice->invoice_garage_id           =   $request->txtgarageid;
+            $updateInvoice->invoice_customer_id         =   $request->txtcustomerid;
+            $updateInvoice->invoice_vehicle_id          =   $request->txtvehicleid;
+            $updateInvoice->invoice_date                =   date("Y-m-d", strtotime($request->txtestimatedate));
+            $updateInvoice->invoice_labor_total         =   $request->txtsumtotallabour;
+            $updateInvoice->invoice_parts_total         =   $request->txtsumtotalparts;
+            $updateInvoice->invoice_tax                 =   $request->txtsumtotaltax;
+            $updateInvoice->invoice_total               =   $request->txtsumtotaldueamountexcepttax;
+            $updateInvoice->invoice_total_inctax        =   $request->txtsumtotaldueamount;
+            $updateInvoice->invoice_notes               =   $request->txtextranotes;
+            $updateInvoice->invoice_payment_status      =   "0";
+            $updateInvoice->invoice_status              =   "1";
+
+            $updateInvoice->save();
+
+            EstimateLaborModel::where('estimate_labor_estimate_id', $updateInvoice->invoice_id)
+                                ->where('estimate_labor_reference_id', "2")
+                                ->where('estimate_labor_reference_type', "2")
+                                ->delete();
+
+            // Store related labor items
+            $labourIds      = $request->txtlabourname;
+            $laborhours     = $request->txtlabourhours;
+            $laborcost      = $request->txtlabourcost;
+            $labortotalcost = $request->txttotallabourcust;
+            $labortax       = $request->txtlabourtax;
+            $laborgrandtotal= $request->txtlabourtotal;
+
+            foreach ($labourIds as $index => $labourtitle) {
+                $labor = new EstimateLaborModel();
+                $labor->estimate_labor_estimate_id      = $updateInvoice->invoice_id;
+                $labor->estimate_labor_reference_id     = "2";
+                $labor->estimate_labor_reference_type   = "2";
+                $labor->estimate_labor_item             = $labourtitle;
+                $labor->estimate_labor_rate             = $laborcost[$index];
+                $labor->estimate_labor_hours            = $laborhours[$index];
+                $labor->estimate_labor_cost             = $labortotalcost[$index];
+                $labor->estimate_labor_tax              = $labortax[$index];
+                $labor->estimate_labor_total            = $laborgrandtotal[$index];
+                $labor->estimate_labor_status           = "1";
+                $labor->save();
+            }
+
+            EstimatePartsModel::where('estimate_parts_estimate_id', $updateInvoice->invoice_id)
+                                ->where('estimate_parts_reference_id', "2")
+                                ->where('estimate_parts_reference_type', "2")
+                                ->delete();
+
+            // Store related product items
+            $productIds     = $request->txtproductname;
+            $productqty     = $request->txtproductqty;
+            $productprice   = $request->txtproductprice;
+            $productmarkup  = $request->txtproductcost;
+            $producttax     = $request->txtproducttax;
+            $producttotal   = $request->txtproducttotalprice;
+            $producttitle   = $request->txtproducttitle;
+
+            foreach ($productIds as $index => $productid) {
+                $product = new EstimatePartsModel();
+                $product->estimate_parts_estimate_id    = $updateInvoice->invoice_id;
+                $product->estimate_parts_reference_id   = "2";
+                $product->estimate_parts_reference_type = "2";
+                $product->estimate_parts_product_id     = $productid;
+                $product->estimate_parts_product_name   = $producttitle[$index];
+                $product->estimate_parts_quantity       = $productqty[$index];
+                $product->estimate_parts_cost           = $productprice[$index];
+                $product->estimate_parts_markup         = $productmarkup[$index];
+                $product->estimate_parts_tax            = $producttax[$index];
+                $product->estimate_parts_total          = $producttotal[$index];
+                $product->estimate_parts_status         = "1";
+                $product->save();
+            }
+
+            DB::commit(); // ✅ Commit transaction
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Invoice Updated successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ Rollback on error
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while saving data.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }

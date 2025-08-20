@@ -98,10 +98,17 @@
                                                 <input type="text" class="form-control" id="firstnameInput" placeholder="Enter your firstname" value="{{ $user->name }}" name="txtfullname">
                                             </div>
                                         </div>
+                                        @php
+                                            $phone = "";
+                                            if($user->mobilenumber)
+                                            {
+                                                $phone = "+".$user->countrycode.$user->mobilenumber;
+                                            }
+                                        @endphp
                                         <div class="col-12 col-md-6 col-lg-6">
                                             <div class="formgroup mb-3">
                                                 <label for="txtgopphonenumber" class="form-label">Phone Number</label>
-                                                <input type="text" class="form-control" id="txtgopphonenumber" placeholder="Enter your phone number" value="+{{ $user->countrycode. "" .$user->mobilenumber  }}" name="txtmobile">
+                                                <input type="text" class="form-control" id="txtgopphonenumber" placeholder="Enter your phone number" value="{{ $phone }}" name="txtmobile">
                                                 <div id="error-msg-gop" class="hide"></div>
                                                 <div id="valid-msg-gop" class="hide"></div>
                                                 <button id="btn-gop" style="display:none;">Validate</button>

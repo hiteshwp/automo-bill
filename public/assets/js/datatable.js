@@ -1180,6 +1180,49 @@ $(document).ready(function() {
             }
         });
     });
+
+    $(document).on('click', '.generateClientPasswordModal', function () {
+        const userId = $(this).data('id');
+        $("#txtclientid").val(userId);
+    });
+
+    $(document).on('click', '#generate-client-password', function () {
+        const userId = $("#txtclientid").val();
+        const $btn = $(this); 
+        $.ajax({
+            url: baseUrl + '/clients/generate-password',
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                userId: userId
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            beforeSend: function(jqXHR, settings) {
+                $btn.prop('disabled', true).text('Generating...');
+            },
+            success: function (res) {
+                toastr.success(res.message);
+                $btn.prop('disabled', false).text('Yes, Generate It!');
+                $('#generateClientPasswordModal').offcanvas('hide');
+                $('#garageOwnersClientsTable').DataTable().ajax.reload(null, false);
+            },
+            error: function(xhr, error, thrown) {
+                $btn.prop('disabled', true).text('Yes, Generate It!');
+                if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                    toastr.error('Session expired due to inactivity. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else if (xhr.status === 401) {
+                    toastr.error('Unauthorized access. Redirecting to login...');
+                    window.location.href = baseUrl + '/login';
+                } else {
+                    console.error("AJAX error:", xhr.responseText);
+                    toastr.error("AJAX error:", xhr.responseText);
+                }
+            }
+        });
+    });
     // Client Section related details end
 
     // Garage Owner Client's Vehicle Detail start
@@ -3616,6 +3659,71 @@ $(document).ready(function() {
             });
         }
 
+        $('#frmeditestimateinformation').parsley();
+        $('#frmeditestimateinformation').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmeditestimateinformation').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/estimate/update',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btnupdateestimate").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btnupdateestimate").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 3000);
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btnupdateestimate").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
     // End
 
     // Repair Order Module code start
@@ -3734,6 +3842,72 @@ $(document).ready(function() {
                 pageLength: 10, // Default records per page
             });
         }
+
+        $('#frmeditrepairorderinformation').parsley();
+        $('#frmeditrepairorderinformation').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmeditrepairorderinformation').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/repair-order/update',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btnupdaterepairorder").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btnupdaterepairorder").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 3000);
+
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btnupdaterepairorder").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
 
     // End
 
@@ -3969,6 +4143,71 @@ $(document).ready(function() {
                 printWindow.print();
                 printWindow.close();
             }, 500);
+        });
+
+        $('#frmeditinvoiceinformation').parsley();
+        $('#frmeditinvoiceinformation').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmeditinvoiceinformation').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/invoice/update',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btneditestimate").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btneditestimate").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 3000);
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btneditestimate").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
         });
 
     // End
@@ -4303,5 +4542,404 @@ $(document).ready(function() {
         });
 
     // End
+
+    // View Client details with vehicle details as per select vehicle from dropdown
+
+        $("#vehiclelisting").on('change', function () 
+        {
+            const vehicleId = $(this).val();
+            if( vehicleId != "" )
+            {
+                $.ajax({
+                    url: baseUrl + '/clients/vehicle-client-detail',
+                    type: 'POST',
+                    data: {
+                        _token: csrfToken,
+                        vehicleId: vehicleId
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    beforeSend: function(jqXHR, settings) {
+                        $("#clientvehicledetailcontainer").addClass("offcanvas-loader");
+                    },
+                    success: function (data) {
+                        $("#clientvehicledetailcontainer").removeClass("offcanvas-loader");
+                        // Populate the form fields
+                        $('.clientvehicleselecedvehicle').text(data.selected_vehicle);
+                        $('.clientvehiclelicenceplate').text(data.licence_plate);
+                        $('.clientvehiclevin').text(data.vin);
+                        $('.clientvehicleclientid').text(data.client_id);
+                        $('.clientvehicleclientname').text(data.client_name);
+                        $('.clientvehiclemake').text(data.vehicle_make);
+                        $('.clientvehiclemodel').text(data.vehicle_model);
+                        $('.clientvehicleyear').text(data.vehicle_year);
+                        $('.clientvehiclephone').text(data.client_phone);
+                        $('.clientvehiclemobile').text(data.client_mobile);
+                        $('.clientvehicleaddress').text(data.client_address);
+                        $('.clientvehicleemail').text(data.client_email);
+                    },
+                    error: function(xhr, error, thrown) {
+                        if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                            toastr.error('Session expired due to inactivity. Redirecting to login...');
+                            window.location.href = baseUrl + '/login';
+                        } else if (xhr.status === 401) {
+                            toastr.error('Unauthorized access. Redirecting to login...');
+                            window.location.href = baseUrl + '/login';
+                        } else {
+                            console.error("AJAX error:", xhr.responseText);
+                            toastr.error("AJAX error:", xhr.responseText);
+                        }
+                    }
+                });
+            }
+        });
+
+    // End
+
+    // Get the product amount using ajax
+
+        $(document).on('change', '.product-select', function () 
+        {
+            const productId = $(this).val();
+            let $row = $(this).closest('tr.product');
+            if( productId != "" )
+            {
+                $.ajax({
+                    url: baseUrl + '/estimate/get-product-detail',
+                    type: 'POST',
+                    data: {
+                        _token: csrfToken,
+                        productId: productId
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    beforeSend: function(jqXHR, settings) {
+                        $("#productitemlistingwrapper").addClass("offcanvas-loader");
+                    },
+                    success: function (data) {
+                        $("#productitemlistingwrapper").removeClass("offcanvas-loader");
+                        // Populate the form fields
+                        if(data.status == "success")
+                        {
+                            $row.find('.product-price').val(data.data.product_price);
+                            calculateProductTotal($row);
+                        }
+                    },
+                    error: function(xhr, error, thrown) {
+                        if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                            toastr.error('Session expired due to inactivity. Redirecting to login...');
+                            window.location.href = baseUrl + '/login';
+                        } else if (xhr.status === 401) {
+                            toastr.error('Unauthorized access. Redirecting to login...');
+                            window.location.href = baseUrl + '/login';
+                        } else {
+                            console.error("AJAX error:", xhr.responseText);
+                            toastr.error("AJAX error:", xhr.responseText);
+                        }
+                    }
+                });
+            }
+        });
+
+    // End
+
+    // Client Booking
+
+        let dataClientBookingRoute = $('#userBookingTable').data('route');
+        if ($('#userBookingTable').length) 
+        {
+            $('#userBookingTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url:dataClientBookingRoute,
+                    type: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                    },
+                    error: function(xhr, error, thrown) {
+                        if (xhr.status === 401) {
+                            alert("Session expired. Redirecting to login...");
+                            window.location.href = baseUrl + '/login';
+                        } else {
+                            console.error("DataTable load error:", xhr.responseText);
+                        }
+                    }
+                },
+                stateSave: true,
+                columns: [
+                    { data: 'booking_id', name: 'booking_id' },
+                    { data: 'booking_date_time', name: 'booking_date_time' },
+                    { data: 'garage_owner_name', name: 'garage_owner_name' },
+                    { data: 'number_plate', name: 'number_plate' },
+                    { data: 'booking_details', name: 'booking_details' },
+                    { data: 'booking_is_covidsafe', name: 'booking_is_covidsafe' },
+                    { data: 'booking_is_service', name: 'booking_is_service' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                order: [[0, 'asc']], // Default sorting by ID
+                lengthMenu: [10, 25, 50, 100], // Records per page options
+                pageLength: 10, // Default records per page
+            });
+        }
+
+        $("#txtbookingclientvehicle").on('change', function () 
+        {
+            const customerId = $("#txtbookingclientvehicle option:selected").data("customerid");
+            if( customerId != "" )
+            {
+                const curdatetime = $('#ttxtbookingdatetime').val();
+                let date = "";
+                let time = "";
+                if( curdatetime != "" )
+                {
+                    let curdatetime = curdatetime.split(" ");
+                    date = curdatetime[0];
+                    time = curdatetime[1];
+                }
+                let company_name = "";
+                send_covid_sms_template($('#txtbookingclientname').val(), date, time, company_name, "txtcovidsafenotificationtemplate");
+            }
+            else
+            {
+                $('#txtbookingclientname').val("");
+                $('#txtbookinguserid').val("");
+            }
+        });
+
+        $('#frmclientnewbookinginformation').parsley();
+        $('#frmclientnewbookinginformation').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmclientnewbookinginformation').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/my-booking/store',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btnclientnewbooking").prop('disabled', true).text('Saving...');
+                    },
+                    success: function (res) {
+                        $("#btnclientnewbooking").prop('disabled', false).text('Save');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            $('#userBookingTable').DataTable().ajax.reload(null, false);
+                            $('#sidebarNewBooking').offcanvas('hide');
+                            // Reset form and Parsley validation
+                            $('#frmaddnewbookinginformation').trigger("reset");
+                            $('#frmaddnewbookinginformation').parsley().reset();
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btnclientnewbooking").prop('disabled', false).text('Save');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.getClientbookingDetails', function () {
+            $("#txtupdateclientbookingvehicle, #txtbookingclientgarageowner").select2({
+                width: '100%',
+                dropdownParent: $('#sidebarEditBooking')
+            });
+
+            const bookingId = $(this).data('bookingid');
+
+            $.ajax({
+                url: baseUrl + '/my-booking/getviewclientbookingdetails',
+                type: 'POST',
+                data: {
+                    _token: csrfToken,
+                    bookingId: bookingId
+                },
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                beforeSend: function(jqXHR, settings) {
+                    $("#sidebarEditBooking").addClass("offcanvas-loader");
+                },
+                success: function (data) {
+                    $("#sidebarEditBooking").removeClass("offcanvas-loader");
+                    $("#txtupdateclientbookingvehicle").val(data.booking_vehicle_id).trigger('change');
+                    $("#txtbookingclientgarageowner").val(data.booking_garage_id).trigger('change');
+                    $("#ttxtupdateclientbookingdatetime").val(data.booking_date_time);
+                    $("#txtupdatebookingdetails").val(data.booking_details);
+                    $("#txtupdatecovidsafenotificationtemplate").val(data.booking_sms_template); // if available
+                    $("#txtupdatebookinguserid").val(data.booking_customer_id);
+                    $("#txtupdatebookingdate").val(data.booking_date);
+                    $("#txtupdatebookingtime").val(data.booking_time);
+                    $("#txtupdatebookingid").val(data.booking_id);
+
+                    $('#txtupdatebookingservice').attr("checked", false);
+                    if( data.booking_is_service == "1" )
+                    {
+                        $('#txtupdatebookingservice').attr("checked", true);
+                    }
+
+                    $('#txtupdatebookingcovidsafe').attr("checked", false);
+                    if( data.booking_is_covidsafe == "2" )
+                    {
+                        $('#txtupdatebookingcovidsafe').attr("checked", true);
+                    }
+
+                    // Initialize flatpickr with datetime settings
+                    const fp = initUpdateFlatpickr("#ttxtupdateclientbookingdatetime", {
+                        enableTime: true,
+                        dateFormat: "Y-m-d H:i"
+                    });
+
+                    fp.setDate(data.booking_date_time);
+
+                    //$("#ttxtupdatebookingdatetime").flatpickr().setDate(data.booking_date_time);
+                },
+                error: function(xhr, error, thrown) {
+                    if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                        toastr.error('Session expired due to inactivity. Redirecting to login...');
+                        window.location.href = baseUrl + '/login';
+                    } else if (xhr.status === 401) {
+                        toastr.error('Unauthorized access. Redirecting to login...');
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("AJAX error:", xhr.responseText);
+                        toastr.error("AJAX error:", xhr.responseText);
+                    }
+                }
+            });
+        });
+
+        $('#frmupdateclientbookinginformation').parsley();
+        $('#frmupdateclientbookinginformation').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmupdateclientbookinginformation').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/my-booking/update',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btnupdateclientbooking").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btnupdateclientbooking").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            $('#userBookingTable').DataTable().ajax.reload(null, false);
+                            $('#sidebarEditBooking').offcanvas('hide');
+                            // Reset form and Parsley validation
+                            $('#frmupdateclientbookinginformation').trigger("reset");
+                            $('#frmupdateclientbookinginformation').parsley().reset();
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btnupdateclientbooking").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+        function initUpdateFlatpickr() {
+            const $input = $("#ttxtupdateclientbookingdatetime");
+
+            // destroy if already initialized
+            if ($input.length && $input[0]._flatpickr) {
+                $input[0]._flatpickr.destroy();
+            }
+
+            // re-initialize
+            flatpickr($input[0], {
+                dateFormat: "Y-m-d H:i",
+                allowInput: true,
+                enableTime: true,
+                onClose: function (selectedDates) {
+                    if (selectedDates.length > 0) {
+                        const selectedDate = selectedDates[0];
+                        const formattedDate = selectedDate.toISOString().split("T")[0];
+                        const formattedTime = `${String(selectedDate.getHours()).padStart(2, "0")}:${String(selectedDate.getMinutes()).padStart(2, "0")}`;
+                        const clientname = $("#txtupdatebookingclientname").val();
+                        send_covid_sms_template(clientname, formattedDate, formattedTime, "", "txtupdatecovidsafenotificationtemplate");
+                        $("#txtupdatebookingdate").val(formattedDate);
+                        $("#txtupdatebookingtime").val(formattedTime);
+                    }
+                }
+            });
+        }
+
+    // 
 
 });

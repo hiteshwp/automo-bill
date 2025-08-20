@@ -6,7 +6,7 @@
 <html lang="en" data-layout="horizontal" data-topbar="dark" data-sidebar-size="lg" data-sidebar="light" data-sidebar-image="none" data-preloader="disable">
     <head>
         <meta charset="utf-8" />
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>@yield('title', config('app.name', 'Laravel'))</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="" name="description" />
         <meta content="" name="author" />
@@ -108,11 +108,11 @@
                             </button>
                         </div>
 
-                        <div class="header-item d-none d-sm-flex">
+                        <!-- <div class="header-item d-none d-sm-flex">
                             <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle light-dark-mode">
                                 <i class='ri-moon-clear-line fs-22'></i>
                             </button>
-                        </div>
+                        </div> -->
 
                         <div class="dropdown topbar-head-dropdown ms-1 header-item" id="notificationDropdown">
                             <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
@@ -236,7 +236,7 @@
                                 <h6 class="dropdown-header">Welcome {{ Auth::user()->name }}!</h6>
                                 @if(auth()->user()->user_type === 'Garage Owner')
                                     <a class="dropdown-item" href="{{ route('garage-owner.profile') }}"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Profile</span></a>
-                                    <a class="dropdown-item" href="#"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
+                                    <a class="dropdown-item" href="{{ route('garage-owner.plans.my-account-view') }}"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
                                     <a class="dropdown-item" href="{{ route('garage-owner.setting') }}"><i class="ri-settings-3-line align-middle me-1"></i> <span class="align-middle">Setting</span></a>
                                     <a class="dropdown-item" href="#"><i class="ri-lock-line align-middle me-1"></i> <span class="align-middle">Lock screen</span></a>
                                 @endif
@@ -248,13 +248,13 @@
                             </div>
                         </div>
 
-                        <div class="header-item d-none d-sm-flex">
+                        <!-- <div class="header-item d-none d-sm-flex">
                             <div class="customizer-setting">
                                 <div class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle light-dark-mode" data-bs-toggle="offcanvas" data-bs-target="#theme-settings-offcanvas" aria-controls="theme-settings-offcanvas">
                                     <i class='ri-settings-3-line fs-22'></i>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -454,6 +454,26 @@
                                         <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('user.booking.list') }}">
+                                        <i class="ri-calendar-check-line"></i> <span data-key="t-booking">My Booking</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('user.estimate.list') }}">
+                                        <i class="ri-calculator-line"></i> <span data-key="t-estimates">Booking Estimate</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('user.repair-order.list') }}">
+                                        <i class="ri-list-settings-line"></i> <span data-key="t-repair-orders">Repair Orders</span>
+                                    </a>
+                                </li>                                
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link" href="{{ route('user.invoice.list') }}">
+                                        <i class="ri-file-list-3-line"></i> <span data-key="t-invoices">Invoices</span>
+                                    </a>
+                                </li>
                             @endif
                         @endauth
                     </ul>
@@ -500,7 +520,7 @@
     </div>
 
     <!-- Theme Settings -->
-    <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="theme-settings-offcanvas">
+    <!-- <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="theme-settings-offcanvas">
         <div class="d-flex align-items-center bg-primary bg-gradient p-3 offcanvas-header">
             <h5 class="m-0 me-2 text-white">Theme Customizer</h5>
             <button type="button" class="btn-close btn-close-white ms-auto" id="customizerclose-btn" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -553,7 +573,7 @@
                             </div>
                             <h5 class="fs-13 text-center mt-2">Horizontal</h5>
                         </div>
-                        <!-- end col -->
+                        
                     </div>
 
                     <h6 class="mt-4 mb-0 fw-bold text-uppercase">Color Scheme</h6>
@@ -720,13 +740,13 @@
                                                 </span>
                                             </span>
                                         </span>
-                                        <!-- <div id="preloader"> -->
+                                        
                                         <div id="status" class="d-flex align-items-center justify-content-center">
                                             <div class="spinner-border text-primary avatar-xxs m-auto" role="status">
                                                 <span class="visually-hidden">Loading...</span>
                                             </div>
                                         </div>
-                                        <!-- </div> -->
+                                        
                                     </label>
                                 </div>
                                 <h5 class="fs-13 text-center mt-2">Enable</h5>
@@ -758,7 +778,7 @@
                         </div>
                     
                     </div>
-                    <!-- end preloader-menu -->
+                    
 
                 </div>
             </div>
@@ -771,7 +791,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- removeNotificationModal -->
     <div id="removeNotificationModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
@@ -808,8 +828,8 @@
     <script src="{{ asset('assets/libs/echarts/echarts.min.js') }}"></script>
     <script src="{{ asset('assets/js/pages/echarts.init.js') }}"></script>
     <!-- calendar min js -->
-    <!-- <script src="{{ asset('assets/libs/fullcalendar/index.global.min.js') }}"></script>
-    <script src="{{ asset('assets/js/pages/calendar.init.js') }}"></script> -->
+    <script src="{{ asset('assets/libs/fullcalendar/index.global.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/calendar.init.js') }}"></script>
 
     <script src="{{ asset('assets/libs/prismjs/prism.js') }}"></script>
     <script src="{{ asset('assets/js/pages/form-validation.init.js') }}"></script>
@@ -851,6 +871,18 @@
     <script src="{{ asset('assets/js/parsley.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
     <!-- Custom Data table js -->
+
+    <script>
+        @if (session('status'))
+            toastr.success("{{ session('status') }}", "Success", { timeOut: 5000 });
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error("{{ $error }}", "Error", { timeOut: 5000 });
+            @endforeach
+        @endif
+    </script>
 
     <script>
         //let iti;
@@ -946,18 +978,6 @@
 
     <script src="{{ asset('assets/js/datatable.js') }}"></script>
 
-    <script>
-        @if (session('status'))
-            toastr.success("{{ session('status') }}", "Success", { timeOut: 5000 });
-        @endif
-
-        @if ($errors->any())
-            @foreach ($errors->all() as $error)
-                toastr.error("{{ $error }}", "Error", { timeOut: 5000 });
-            @endforeach
-        @endif
-    </script>
-
     <script type="text/javascript">
         $(document).ready(function () {
             let baseUrl = $(".siteurl").data("url");
@@ -1021,18 +1041,21 @@
             }
 
             const companyLogo = document.getElementById('companysettingimage').getAttribute('data-imagepath');
-            FilePond.create(fileInput, {
-                allowImagePreview: true,
-                imagePreviewHeight: 250,
-                files: companyLogo
-                    ? [
-                        {
-                            source: companyLogo,
-                            options: { type: 'remote' }
-                        }
-                    ]
-                    : []
-            });
+            if( companyLogo )
+            {
+                FilePond.create(fileInput, {
+                    allowImagePreview: true,
+                    imagePreviewHeight: 250,
+                    files: companyLogo
+                        ? [
+                            {
+                                source: companyLogo,
+                                options: { type: 'remote' }
+                            }
+                        ]
+                        : []
+                });
+            }
         });
     </script>
     

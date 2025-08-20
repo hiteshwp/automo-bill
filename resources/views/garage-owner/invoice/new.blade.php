@@ -45,12 +45,19 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            @php
+                                                $phone = "N/A";
+                                                if($setting_data->setting_phone_number)
+                                                {
+                                                    $phone = "+".$setting_data->setting_countrycode. " " .$setting_data->setting_phone_number;
+                                                }
+                                            @endphp
                                             <div class="flex-shrink-0 mt-sm-0 mt-3">
-                                                <h6><span>John Doe Corporation</span></h6>
-                                                <h6><span>Man Machine Works</span></h6>
-                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> General Palace, Comman Street, VA</span></h6>
-                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> (859)-678-9645</span></h6>
-                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">support.jdc@mailinator.com</span></h6>
+                                                <h6><span>{{ $setting_data->setting_system_name ?? "N/A" }}</span></h6>
+                                                <h6><span>{{ $setting_data->setting_tag_line ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Address:</span> <span id="address"> {{ $setting_data->setting_address ?? "N/A" }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Phone:</span> <span id="contact-no"> {{ $phone }}</span></h6>
+                                                <h6><span class="text-muted fw-normal">Email:</span> <span id="email">{{ $setting_data->setting_email ?? "N/A" }}</span></h6>
                                             </div>
                                         </div>
                                     </div>
@@ -116,9 +123,9 @@
                                                                     <div class="formgroup">
                                                                         <select class="form-select rate" name="txtlabourcost[]">
                                                                             <option>Cost</option>
-                                                                            <option value="60" {{ $labour_data_list->estimate_labor_rate == "60" ? 'selected' : '' }}>60</option>
-                                                                            <option value="40" {{ $labour_data_list->estimate_labor_rate == "40" ? 'selected' : '' }}>40</option>
-                                                                            <option value="80" {{ $labour_data_list->estimate_labor_rate == "80" ? 'selected' : '' }}>80</option>
+                                                                            <option value="{{ $setting_data->setting_labor_1 }}" {{ $labour_data_list->estimate_labor_rate == $setting_data->setting_labor_1 ? 'selected' : '' }}>{{ $setting_data->setting_labor_1 }}</option>
+                                                                            <option value="{{ $setting_data->setting_labor_2 }}" {{ $labour_data_list->estimate_labor_rate == $setting_data->setting_labor_2 ? 'selected' : '' }}>{{ $setting_data->setting_labor_2 }}</option>
+                                                                            <option value="{{ $setting_data->setting_labor_3 }}" {{ $labour_data_list->estimate_labor_rate == $setting_data->setting_labor_3 ? 'selected' : '' }}>{{ $setting_data->setting_labor_3 }}</option>
                                                                         </select>
                                                                     </div>
                                                                 </td>
@@ -131,9 +138,9 @@
                                                                     <div class="formgroup">
                                                                         <select class="form-select tax" name="txtlabourtax[]">
                                                                             <option>None</option>
-                                                                            <option value="10" {{ $labour_data_list->estimate_labor_tax == "10" ? 'selected' : '' }}>10</option>
-                                                                            <option value="13" {{ $labour_data_list->estimate_labor_tax == "13" ? 'selected' : '' }}>13</option>
-                                                                            <option value="15" {{ $labour_data_list->estimate_labor_tax == "15" ? 'selected' : '' }}>15</option>
+                                                                            <option value="{{ $setting_data->setting_tax_1 }}" {{ $labour_data_list->estimate_labor_tax == $setting_data->setting_tax_1 ? 'selected' : '' }}>{{ $setting_data->setting_tax_1 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_2 }}" {{ $labour_data_list->estimate_labor_tax == $setting_data->setting_tax_2 ? 'selected' : '' }}>{{ $setting_data->setting_tax_2 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_3 }}" {{ $labour_data_list->estimate_labor_tax == $setting_data->setting_tax_3 ? 'selected' : '' }}>{{ $setting_data->setting_tax_3 }}</option>
                                                                         </select>
                                                                     </div>
                                                                 </td>
@@ -214,9 +221,9 @@
                                                                     <div class="formgroup">
                                                                         <select class="form-select product-tax" name="txtproducttax[]">
                                                                             <option value="">None</option>
-                                                                            <option value="10" {{ $product_data_list->estimate_parts_tax == "10" ? 'selected' : '' }}>10</option>
-                                                                            <option value="13" {{ $product_data_list->estimate_parts_tax == "13" ? 'selected' : '' }}>13</option>
-                                                                            <option value="15" {{ $product_data_list->estimate_parts_tax == "15" ? 'selected' : '' }}>15</option>
+                                                                            <option value="{{ $setting_data->setting_tax_1 }}" {{ $product_data_list->estimate_parts_tax == $setting_data->setting_tax_1 ? 'selected' : '' }}>{{ $setting_data->setting_tax_1 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_2 }}" {{ $product_data_list->estimate_parts_tax == $setting_data->setting_tax_2 ? 'selected' : '' }}>{{ $setting_data->setting_tax_2 }}</option>
+                                                                            <option value="{{ $setting_data->setting_tax_3 }}" {{ $product_data_list->estimate_parts_tax == $setting_data->setting_tax_3 ? 'selected' : '' }}>{{ $setting_data->setting_tax_3 }}</option>
                                                                         </select>
                                                                     </div>
                                                                 </td>
