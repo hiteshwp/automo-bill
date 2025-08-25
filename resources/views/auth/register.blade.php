@@ -112,7 +112,7 @@
                                         <div class="col-12 col-md-4">
                                             <div class="mb-3">
                                                 <label for="emailaddress" class="form-label">Email Address</label>
-                                                <input type="text" class="form-control" id="emailaddress" name="email" placeholder="Enter your email address" value="{{ old('email') }}" required>
+                                                <input type="email" class="form-control" id="emailaddress" name="email" placeholder="Enter your email address" value="{{ old('email') }}" required>
                                                 @error('email')
                                                     <div class="text-danger" role="alert">{{ $message }}</div>
                                                 @enderror
@@ -216,8 +216,8 @@
                                             <h5 class="mb-4 title fw-normal">Or Log in with</h5>
                                         </div>
                                         <div>
-                                            <button type="button" class="btn btn-soft-danger waves-effect waves-light"><i class="ri-google-fill fs-16"></i> Google</button>
-                                            <button type="button" class="btn btn-soft-primary waves-effect waves-light"><i class="ri-facebook-fill fs-16"></i> Facebook</button>
+                                            <a href="{{ route('google.login') }}" class="btn btn-soft-danger waves-effect waves-light"><i class="ri-google-fill fs-16"></i> Google</a>
+                                            <a href="{{ route('facebook.login') }}" class="btn btn-soft-primary waves-effect waves-light"><i class="ri-facebook-fill fs-16"></i> Facebook</a>
                                         </div>
                                     </div>
     
@@ -396,9 +396,10 @@
     <script src="{{ asset('assets/js/app.js') }}"></script>
 
     <script src="{{ asset('assets/js/parsley.js') }}"></script>
+
     <script type="text/javascript">
         $(document).ready(function () {
-            //$("#frmregister").parsley();
+            $("#frmregister").parsley();
 
             let baseUrl = window.location.origin; // Dynamically get base URL
 

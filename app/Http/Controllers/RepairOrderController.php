@@ -30,14 +30,16 @@ class RepairOrderController extends Controller
         if (!Auth::check()) {
             abort(response()->json(['error' => 'Unauthenticated'], 401));
         }
-
-        if (Auth::user()->user_type !== 'Garage Owner') {
-            abort(response()->json(['error' => 'Unauthenticated'], 401));
-        }
     }
+
+    // For Garage Owenr data
 
     public function index($id)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -74,6 +76,10 @@ class RepairOrderController extends Controller
 
     public function store(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $garage_Owner = Auth::user();
 
         //echo "<pre>"; print_r($request->all()); die;
@@ -147,6 +153,10 @@ class RepairOrderController extends Controller
 
     public function list()
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -158,6 +168,10 @@ class RepairOrderController extends Controller
 
     public function getRepairOrderData(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
 
         $user_id = $user->id;
@@ -263,6 +277,10 @@ class RepairOrderController extends Controller
 
     public function edit($id)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -299,6 +317,10 @@ class RepairOrderController extends Controller
 
     public function update(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $garage_Owner = Auth::user();
 
         //echo "<pre>"; print_r($request->all()); die;
@@ -373,4 +395,177 @@ class RepairOrderController extends Controller
             ], 500);
         }
     }
+
+    // End
+
+    // #################################################################################################### //
+
+    // For User data
+
+    public function clientRepairOrderData()
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $repair_order_data = RepairOrderModel::whereNull('deleted_at')
+                                                ->get();
+
+        return view('user.repair-order.list', compact('repair_order_data'));
+    }
+
+    public function getClientRepairOrderData(Request $request)
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $repair_order = RepairOrderModel::select('tbl_repair_order.*', 'users.name as garage_owner_name', 'tbl_vehicles.number_plate as number_plate', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle')
+                        ->leftJoin('users', 'tbl_repair_order.repairorder_garage_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_repair_order.repairorder_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->where('tbl_repair_order.repairorder_customer_id', $user_id)
+                        ->where('users.user_type', 'Garage Owner')
+                        ->whereNull('tbl_repair_order.deleted_at')
+                        ->orderBy('tbl_repair_order.repairorder_id', 'desc');
+
+        return DataTables::of($repair_order)
+            ->filter(function ($query) use ($request) {
+                if (!empty($request->search['value'])) {
+                    $search = $request->search['value'];
+                    $query->where(function ($q) use ($search) {
+                        $q->where('repairorder_estimate_id', 'like', "%{$search}%")
+                        ->orWhere('repairorder_order_no', 'like', "%{$search}%")
+                        ->orWhere('repairorder_garage_employee', 'like', "%{$search}%")
+                        ->orWhere('garage_owner_name', 'like', "%{$search}%")
+                        ->orWhere('number_plate', 'like', "%{$search}%")
+                        ->orWhere('vehicle', 'like', "%{$search}%")
+                        ->orWhere('vin', 'like', "%{$search}%")
+                        ->orWhere('repairorder_amount', 'like', "%{$search}%")
+                        ->orWhere('repairorder_order_date', 'like', "%{$search}%")
+                        ->orWhere('repairorder_status', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->addColumn('repairorder_estimate_id', fn($repair_order) => $repair_order->repairorder_estimate_id)
+            ->addColumn('repairorder_order_no', fn($repair_order) => $repair_order->repairorder_order_no)
+            ->addColumn('repairorder_garage_employee', fn($repair_order) => $repair_order->repairorder_garage_employee)
+            ->addColumn('garage_owner_name', fn($repair_order) => $repair_order->garage_owner_name)
+            ->addColumn('number_plate', fn($repair_order) => $repair_order->number_plate)
+            ->addColumn('vehicle', content: fn($repair_order) => $repair_order->vehicle)
+            ->addColumn('vin', fn($repair_order) => $repair_order->vin)
+            ->addColumn('repairorder_amount', fn($repair_order) => $repair_order->repairorder_amount)
+            ->addColumn('repairorder_order_date', fn($repair_order) => date("Y-m-d", strtotime($repair_order->repairorder_order_date)))
+            ->addColumn('repaiorder_clock_in', fn($repair_order) =>
+                '<div class="start-end-timer-block">
+                    <a href="javascript:;" class="badge bg-success-subtle text-success" title="Clock In">
+                        <span class="timer-title" style="display: block;"><i class="ri-time-line"></i> Start Timer</span>
+                        <span class="timer-count" style="display: none;"><i class="ri-time-line"></i> 03/01/2025 - 02:57:38 PM</span>
+                    </a>
+                </div>'
+            )
+            ->addColumn('repaiorder_clock_out', fn($repair_order) =>
+                '<div class="start-end-timer-block">
+                    <a href="javascript:;" class="badge bg-danger-subtle text-danger" title="Clock Out">
+                        <span class="timer-title" style="display: block;"><i class="ri-time-line"></i> End Timer</span>
+                        <span class="timer-count" style="display: none;"><i class="ri-time-line"></i> 03/01/2025 - 02:57:38 PM</span>
+                    </a>
+                </div>'
+            )
+            ->addColumn('repairorder_status', function ($repair_order) {
+                if( $repair_order->repairorder_status == "1" )
+                {
+                    return '<span class="text-warning">Pending</span>';
+                }
+                else if( $repair_order->repairorder_status == "2" )
+                {
+                    return '<span class="text-success">Done</span>';
+                }
+                else if( $repair_order->repairorder_status == "3" )
+                {
+                    return '<span class="text-primary">Not Done</span>';
+                }
+                else
+                {
+                    return '<span class="text-info">Update Estimation Again Request!</span>';
+                }
+            })
+            ->addColumn('action', function ($repair_order) {
+
+                if( $repair_order->repairorder_status == "2" )
+                {
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none disabled" title="Approved Repair Order"><i class="ri-thumb-up-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-danger btn-border btn-icon shadow-none disabled" title="Rejected Repair Order"><i class="ri-thumb-down-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="View TimeLog" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewTimeLog" aria-controls="offcanvasRight"><i class="ri-time-line"></i></a>';
+                }
+                else
+                {   
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none updateRepairOrderStatusModal" data-repairorder-type="Done" data-repairorder-id="'.$repair_order->repairorder_id.'" data-btncolor="btn w-sm btn-success" title="Done Repair Order" data-bs-toggle="offcanvas" data-bs-target="#updateRepairOrderStatusModal" aria-controls="offcanvasRight"><i class="ri-thumb-up-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-danger btn-border btn-icon shadow-none updateRepairOrderStatusModal" data-repairorder-type="Not Done" data-repairorder-id="'.$repair_order->repairorder_id.'" data-btncolor="btn w-sm btn-danger" title="Not Done Repair Order" data-bs-toggle="offcanvas" data-bs-target="#updateRepairOrderStatusModal" aria-controls="offcanvasRight"><i class="ri-thumb-down-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-primary btn-border btn-icon shadow-none" title="View TimeLog" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewTimeLog" aria-controls="offcanvasRight"><i class="ri-time-line"></i></a>';
+                }
+            })
+            ->rawColumns(['repaiorder_clock_in', 'repaiorder_clock_out', 'repairorder_status', 'action'])
+            ->make(true);
+    }
+
+    public function updatRepairOrderStatus(Request $request)
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        //echo "<pre>"; print_r($request->all()); die;
+
+        $validator = Validator::make($request->all(), [
+            'repairorderId'               => 'required|string|max:30',
+            'repairorderType'             => 'required|string|max:50'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()]);
+        }
+
+        DB::beginTransaction(); // ✅ Begin transaction
+
+        try {
+
+             $updateRepairOrder = RepairOrderModel::where('repairorder_id', $request->repairorderId)
+                                            ->firstOrFail();
+
+            $status_arr = array(
+                "Done" => "2",
+                "Not Done"  => "3"
+            );
+
+            $updateRepairOrder->repairorder_status  =   $status_arr[$request->repairorderType];
+            $updateRepairOrder->save();
+
+            DB::commit(); // ✅ Commit transaction
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Repair Order '.strtoupper($request->repairorderType).' successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ Rollback on error
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while saving data.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // End
 }

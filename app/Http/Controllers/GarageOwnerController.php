@@ -32,16 +32,26 @@ class GarageOwnerController extends Controller
         }
 
         $garageOwners = User::where('user_type', 'Garage Owner')
-        ->select('users.*')
-        ->selectSub(function ($query) {
-            $query->from('users as u')
-                ->selectRaw('count(*)')
-                ->whereColumn('u.garage_owner_id', 'users.id')
-                ->whereNull('deleted_at');
-        }, 'garage_user_count')
+        ->withCount('garageUsers')
         ->leftJoin('tbl_countries', 'users.country_id', '=', 'tbl_countries.id')
-        ->addSelect('tbl_countries.name as country_name')
+        ->addSelect('users.*', 'tbl_countries.name as country_name')
         ->orderBy('users.id', 'desc');
+
+        // $garageOwners = User::where('user_type', 'Garage Owner')
+        // ->select('users.*')
+        // ->selectSub(function ($query) {
+        //     $query->from('users as u')
+        //         ->selectRaw('count(*)')
+        //         ->whereColumn('u.garage_owner_id', 'users.id')
+        //         ->where('u.user_type', 'User')
+        //         ->whereNull('u.deleted_at');
+        // }, 'garage_user_count')
+        // ->leftJoin('tbl_countries', 'users.country_id', '=', 'tbl_countries.id')
+        // ->addSelect('tbl_countries.name as country_name')
+        // ->orderBy('users.id', 'desc');
+
+
+        //echo "<pre>"; print_r($garageOwners); die;
 
         //dd($garageOwners);
 

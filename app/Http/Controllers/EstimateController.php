@@ -28,13 +28,15 @@ class EstimateController extends Controller
         if (!Auth::check()) {
             abort(response()->json(['error' => 'Unauthenticated'], 401));
         }
+    }
 
+    // For Garage Owenr data
+    public function index($id)
+    {
         if (Auth::user()->user_type !== 'Garage Owner') {
             abort(response()->json(['error' => 'Unauthenticated'], 401));
         }
-    }
-    public function index($id)
-    {
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -63,6 +65,10 @@ class EstimateController extends Controller
 
     public function store(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+        
         $garage_Owner = Auth::user();
 
         //echo "<pre>"; print_r($request->all()); die;
@@ -181,6 +187,10 @@ class EstimateController extends Controller
 
     public function list()
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -189,6 +199,10 @@ class EstimateController extends Controller
 
     public function getEstimateData(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
 
         $user_id = $user->id;
@@ -262,6 +276,10 @@ class EstimateController extends Controller
 
     public function edit($id)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -299,6 +317,10 @@ class EstimateController extends Controller
 
     public function getProductData(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -326,6 +348,10 @@ class EstimateController extends Controller
 
     public function update(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $garage_Owner = Auth::user();
 
         //echo "<pre>"; print_r($request->all()); die;
@@ -447,4 +473,145 @@ class EstimateController extends Controller
             ], 500);
         }
     }
+    // End
+
+    // #################################################################################################### //
+
+    // For User data
+
+    public function clientEstimateLlist(Request $request)
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        return view('user.estimate.list');
+    }
+
+    public function getCLientEstimateData(Request $request)
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $estimate = EstimateModel::select('tbl_estimate.*', 'users.name as garage_owner_name', 'tbl_vehicles.number_plate as number_plate', 'tbl_vehicles.modelbrand as vehicle')
+                        ->leftJoin('users', 'tbl_estimate.estimate_garage_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_estimate.estimate_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->where('tbl_estimate.estimate_customer_id', $user_id)
+                        ->where('users.user_type', 'Garage Owner')
+                        ->whereNull('tbl_estimate.deleted_at')
+                        ->orderBy('tbl_estimate.estimate_id', 'desc');
+
+        return DataTables::of($estimate)
+            ->filter(function ($query) use ($request) {
+                if (!empty($request->search['value'])) {
+                    $search = $request->search['value'];
+                    $query->where(function ($q) use ($search) {
+                        $q->where('estimate_id', 'like', "%{$search}%")
+                        ->orWhere('estimate_booking_id', 'like', "%{$search}%")
+                        ->orWhere('estimate_estimate_no', 'like', "%{$search}%")
+                        ->orWhere('garage_owner_name', 'like', "%{$search}%")
+                        ->orWhere('number_plate', 'like', "%{$search}%")
+                        ->orWhere('vehicle', 'like', "%{$search}%")
+                        ->orWhere('estimate_total_inctax', 'like', "%{$search}%")
+                        ->orWhere('estimate_total', 'like', "%{$search}%")
+                        ->orWhere('estimate_date', 'like', "%{$search}%")
+                        ->orWhere('estimate_carOwnerApproval', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->addColumn('estimate_id', fn($estimate) => $estimate->estimate_id)
+            ->addColumn('estimate_booking_id', fn($estimate) => $estimate->estimate_booking_id)
+            ->addColumn('estimate_estimate_no', fn($estimate) => $estimate->estimate_estimate_no)
+            ->addColumn('garage_owner_name', fn($estimate) => $estimate->garage_owner_name)
+            ->addColumn('number_plate', fn($estimate) => $estimate->number_plate)
+            ->addColumn('vehicle', content: fn($estimate) => $estimate->vehicle)
+            ->addColumn('estimate_total_inctax', fn($estimate) => $estimate->estimate_total_inctax)
+            ->addColumn('estimate_total', fn($estimate) => $estimate->estimate_total)
+            ->addColumn('estimate_date', fn($estimate) => date("Y-m-d", strtotime($estimate->estimate_date)))
+            ->addColumn('estimate_carOwnerApproval', function ($estimate) {
+                if( $estimate->estimate_carOwnerApproval == "approved" )
+                {
+                    return '<span class="text-success">Approved</span>';
+                }
+                else if( $estimate->estimate_carOwnerApproval == "pending" )
+                {
+                    return '<span class="text-warning">Pending</span>';
+                }
+                {
+                    return '<span class="text-danger">Rejected</span>';
+                }
+            })
+            ->addColumn('action', function ($estimate) {
+                if( $estimate->estimate_carOwnerApproval == "approved" )
+                {
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none disabled" title="Approved Estimate"><i class="ri-thumb-up-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-danger btn-border btn-icon shadow-none disabled" title="Rejected Estimate"><i class="ri-thumb-down-line"></i></a>';
+                }
+                else{
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none updateEstimateStatusModal" data-estimatestatustype="Approve" data-estimateid="'.$estimate->estimate_id.'" data-btncolor="btn w-sm btn-success" title="Approve Estimate" data-bs-toggle="offcanvas" data-bs-target="#updateEstimateStatusModal" aria-controls="offcanvasRight"><i class="ri-thumb-up-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-danger btn-border btn-icon shadow-none updateEstimateStatusModal" data-estimatestatustype="Reject" data-estimateid="'.$estimate->estimate_id.'" data-btncolor="btn w-sm btn-danger" title="Reject Estimate" data-bs-toggle="offcanvas" data-bs-target="#updateEstimateStatusModal" aria-controls="offcanvasRight"><i class="ri-thumb-down-line"></i></a>';
+                }
+            })
+            ->rawColumns(['estimate_carOwnerApproval', 'action'])
+            ->make(true);
+    }
+
+    public function updateEstimateStatus(Request $request)
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $validator = Validator::make($request->all(), [
+            'estimateId'               => 'required|string|max:30',
+            'estimateType'             => 'required|string|max:50'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()]);
+        }
+
+        DB::beginTransaction(); // ✅ Begin transaction
+
+        try {
+
+            $updateEstimate = EstimateModel::where('estimate_id', $request->estimateId)
+                                                ->firstOrFail();
+
+            $status_arr = array(
+                "Approve" => "approved",
+                "Reject"  => "rejected"
+            );
+
+            $updateEstimate->estimate_carOwnerApproval  =   $status_arr[$request->estimateType];
+            $updateEstimate->save();
+
+            DB::commit(); // ✅ Commit transaction
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Estimate '.strtoupper($status_arr[$request->estimateType]).' successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ Rollback on error
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while saving data.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+    // End
 }

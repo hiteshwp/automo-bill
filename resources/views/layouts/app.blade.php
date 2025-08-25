@@ -220,7 +220,22 @@
                         <div class="dropdown ms-sm-3 header-item topbar-user">
                             <button type="button" class="btn p-1 radius-100" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="d-flex align-items-center">
-                                    <img class="rounded-circle header-profile-user" src="{{  asset('assets/images/users/avatar-1.jpg') }}" alt="Header Avatar">
+                                    @if(auth()->user()->user_type === 'Garage Owner')
+                                        @if ( auth()->user()->user_profile_pic != "" )
+                                            <img class="rounded-circle header-profile-user" src="{{ asset('uploads/profiles/garage-owner/'.auth()->user()->user_profile_pic) }}" alt="Header Avatar">
+                                        @else
+                                            <img class="rounded-circle header-profile-user" src="{{  asset('assets/images/users/avatar-1.jpg') }}" alt="Header Avatar">
+                                        @endif
+                                    @endif
+
+                                     @if(auth()->user()->user_type === 'User')
+                                        @if ( auth()->user()->user_profile_pic != "" )
+                                            <img class="rounded-circle header-profile-user" src="{{ asset('uploads/profiles/user/'.auth()->user()->user_profile_pic) }}" alt="Header Avatar">
+                                        @else
+                                            <img class="rounded-circle header-profile-user" src="{{  asset('assets/images/users/avatar-1.jpg') }}" alt="Header Avatar">
+                                        @endif
+                                    @endif
+                                    
                                     <span class="text-start ms-xl-2">
                                     @if(Auth::check())
                                         <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ Auth::user()->name }}</span>
@@ -239,6 +254,10 @@
                                     <a class="dropdown-item" href="{{ route('garage-owner.plans.my-account-view') }}"><i class="ri-account-box-line align-middle me-1"></i> <span class="align-middle">My Account</span></a>
                                     <a class="dropdown-item" href="{{ route('garage-owner.setting') }}"><i class="ri-settings-3-line align-middle me-1"></i> <span class="align-middle">Setting</span></a>
                                     <a class="dropdown-item" href="#"><i class="ri-lock-line align-middle me-1"></i> <span class="align-middle">Lock screen</span></a>
+                                @endif
+
+                                @if(auth()->user()->user_type === 'User')
+                                    <a class="dropdown-item" href="{{ route('user.profile') }}"><i class="ri-user-line align-middle me-1"></i> <span class="align-middle">Profile</span></a>
                                 @endif
                                 
                                 @if(auth()->user()->user_type === 'Super Admin')
@@ -450,30 +469,45 @@
 
                             @if(auth()->user()->user_type === 'User')
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link active" href="{{ route('dashboard.user') }}">
-                                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
+                                    <a class="nav-link menu-link {{ request()->routeIs('dashboard.user') ? 'active' : '' }}" 
+                                    href="{{ route('dashboard.user') }}">
+                                        <i class="ri-dashboard-2-line"></i> 
+                                        <span data-key="t-dashboard">Dashboard</span>
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="{{ route('user.booking.list') }}">
-                                        <i class="ri-calendar-check-line"></i> <span data-key="t-booking">My Booking</span>
+                                    <a class="nav-link menu-link {{ request()->routeIs('user.booking.list') ? 'active' : '' }}" 
+                                    href="{{ route('user.booking.list') }}">
+                                        <i class="ri-calendar-check-line"></i> 
+                                        <span data-key="t-booking">My Booking</span>
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="{{ route('user.estimate.list') }}">
-                                        <i class="ri-calculator-line"></i> <span data-key="t-estimates">Booking Estimate</span>
+                                    <a class="nav-link menu-link {{ request()->routeIs('user.estimate.list') ? 'active' : '' }}" 
+                                    href="{{ route('user.estimate.list') }}">
+                                        <i class="ri-calculator-line"></i> 
+                                        <span data-key="t-estimates">My Booking Estimate</span>
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link" href="{{ route('user.repair-order.list') }}">
-                                        <i class="ri-list-settings-line"></i> <span data-key="t-repair-orders">Repair Orders</span>
-                                    </a>
-                                </li>                                
-                                <li class="nav-item">
-                                    <a class="nav-link menu-link" href="{{ route('user.invoice.list') }}">
-                                        <i class="ri-file-list-3-line"></i> <span data-key="t-invoices">Invoices</span>
+                                    <a class="nav-link menu-link {{ request()->routeIs('user.repair-order.list') ? 'active' : '' }}" 
+                                    href="{{ route('user.repair-order.list') }}">
+                                        <i class="ri-list-settings-line"></i> 
+                                        <span data-key="t-repair-orders">Repair Orders</span>
                                     </a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link {{ request()->routeIs('user.invoice.list') ? 'active' : '' }}" 
+                                    href="{{ route('user.invoice.list') }}">
+                                        <i class="ri-file-list-3-line"></i> 
+                                        <span data-key="t-invoices">Invoices</span>
+                                    </a>
+                                </li>
+
                             @endif
                         @endauth
                     </ul>

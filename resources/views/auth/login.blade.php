@@ -51,11 +51,11 @@
                             @endif
     
                             <div class="auth-form">
-                                <form method="POST" action="{{ route('login') }}">
+                                <form method="POST" action="{{ route('login') }}" id="frmloginform">
                                 @csrf
                                     <div class="mb-3">
                                         <label for="username" class="form-label">Email Address*</label>
-                                        <input type="text" class="form-control" name="email" id="emailaddress" placeholder="Enter your email address" value="{{ old('email') }}">
+                                        <input type="email" class="form-control" name="email" id="emailaddress" placeholder="Enter your email address" value="{{ old('email') }}" required>
                                         @error('email')
                                         <div class="text-danger" role="alert">{{ $message }}</div>
                                         @enderror
@@ -64,7 +64,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="password-input">Password</label>
                                         <div class="position-relative auth-pass-inputgroup mb-3">
-                                            <input type="password" class="form-control pe-5 password-input" name="password" placeholder="Enter your password" id="password-input">
+                                            <input type="password" class="form-control pe-5 password-input" name="password" placeholder="Enter your password" id="password-input" required>
                                             <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon shadow-none" type="button" id="password-addon"><i class="ri-eye-line align-middle"></i></button>
                                             @error('password')
                                                 <div class="text-danger" role="alert">{{ $message }}</div>
@@ -92,8 +92,8 @@
                                             <h5 class="mb-4 title fw-normal">Or Log in with</h5>
                                         </div>
                                         <div>
-                                            <button type="button" class="btn btn-soft-danger waves-effect waves-light"><i class="ri-google-fill fs-16"></i> Google</button>
-                                            <button type="button" class="btn btn-soft-primary waves-effect waves-light"><i class="ri-facebook-fill fs-16"></i> Facebook</button>
+                                            <a href="{{ route('google.login') }}" class="btn btn-soft-danger waves-effect waves-light"><i class="ri-google-fill fs-16"></i> Google</a>
+                                            <a href="{{ route('facebook.login') }}" class="btn btn-soft-primary waves-effect waves-light"><i class="ri-facebook-fill fs-16"></i> Facebook</a>
                                         </div>
                                     </div>
     
@@ -150,6 +150,8 @@
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
+    <script src="{{ asset('assets/js/parsley.js') }}"></script>
+
     <script>
         @if (session('status'))
             toastr.success("{{ session('status') }}", "Success", { timeOut: 5000 });
@@ -160,6 +162,12 @@
                 toastr.error("{{ $error }}", "Error", { timeOut: 5000 });
             @endforeach
         @endif
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#frmloginform').parsley();
+        });
     </script>
 </body>
 </html>

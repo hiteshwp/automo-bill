@@ -208,7 +208,7 @@ class BookingController extends Controller
                 $booking->booking_is_covidsafe = "2";
             }
 
-            $customer_details = User::where("id", $request->txtbookinguserid)->first();
+            //$customer_details = User::where("id", $request->txtbookinguserid)->first();
 
             if ($garage_Owner->google_token) {
                 $start = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
@@ -218,7 +218,7 @@ class BookingController extends Controller
 
                 $googleFactory = new GoogleClientFactory($garage_Owner);
                 $googleEventId = $googleFactory->createEvent(
-                    'Booking: Hello '.$customer_details->name,
+                    'Booking: Hello '.$garage_Owner->name,
                     $start,
                     $end,
                     $request->txtbookingdetails
@@ -557,6 +557,28 @@ class BookingController extends Controller
             if( $request->txtbookingcovidsafe )
             {
                 $booking->booking_is_covidsafe = "2";
+            }
+
+            $garage_owner_details = User::where("id", $request->txtbookinggarageowner)->first();
+
+            if ($garage_owner_details->google_token) {
+                $start = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
+
+                // Optionally add multi-day duration
+                $end = $start->copy()->addDays(2); // or addHour() for 1 hour
+
+                $googleFactory = new GoogleClientFactory($garage_owner_details);
+                $googleEventId = $googleFactory->createEvent(
+                    'Booking: Hello '.$garage_owner_details->name,
+                    $start,
+                    $end,
+                    $request->txtbookingdetails
+                );
+
+                $booking->booking_google_event_id = $googleEventId;
+                $booking->booking_google_event_summary = $request->txtbookingdetails;
+                $booking->booking_google_event_start = $start;
+                $booking->booking_google_event_end = $end;
             }
             
 

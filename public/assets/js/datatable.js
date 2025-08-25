@@ -4213,7 +4213,7 @@ $(document).ready(function() {
     // End
 
 
-    // User Profile Image and Backgorund Image Update
+    // Garage Owner Profile Image and Backgorund Image Update
 
         // Foreground Image
         $("#profile-foreground-img-file-input").on("change", function () {
@@ -4646,7 +4646,6 @@ $(document).ready(function() {
     // End
 
     // Client Booking
-
         let dataClientBookingRoute = $('#userBookingTable').data('route');
         if ($('#userBookingTable').length) 
         {
@@ -4939,7 +4938,440 @@ $(document).ready(function() {
                 }
             });
         }
-
     // 
+
+    // Client Estimate
+        let dataClientEstimateRoute = $('#userEstimateTable').data('route');
+        if ($('#userEstimateTable').length) 
+        {
+            $('#userEstimateTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url:dataClientEstimateRoute,
+                    type: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                    },
+                    error: function(xhr, error, thrown) {
+                        if (xhr.status === 401) {
+                            alert("Session expired. Redirecting to login...");
+                            window.location.href = baseUrl + '/login';
+                        } else {
+                            console.error("DataTable load error:", xhr.responseText);
+                        }
+                    }
+                },
+                stateSave: true,
+                columns: [
+                    { data: 'estimate_id', name: 'estimate_id' },
+                    { data: 'estimate_booking_id', name: 'estimate_booking_id' },
+                    { data: 'estimate_estimate_no', name: 'estimate_estimate_no' },
+                    { data: 'garage_owner_name', name: 'garage_owner_name' },
+                    { data: 'vehicle', name: 'vehicle' },
+                    { data: 'number_plate', name: 'number_plate' },
+                    { data: 'estimate_total_inctax', name: 'estimate_total_inctax' },
+                    { data: 'estimate_total', name: 'estimate_total' },
+                    { data: 'estimate_date', name: 'estimate_date' },
+                    { data: 'estimate_carOwnerApproval', name: 'estimate_carOwnerApproval' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                order: [[0, 'asc']], // Default sorting by ID
+                lengthMenu: [10, 25, 50, 100], // Records per page options
+                pageLength: 10, // Default records per page
+            });
+        }
+
+        $(document).on('click', '.updateEstimateStatusModal', function () {
+            const estimateId = $(this).data('estimateid'),
+                    estimateType = $(this).data('estimatestatustype'),
+                    btnColor = $(this).data('btncolor');
+            $("#txtestimateid").val(estimateId);
+            $("#txtestimatetype").val(estimateType);
+            $("#update-estimate-btn").text("Yes, "+estimateType+" It!");
+            $("#update-estimate-btn").attr("class", "");
+            $("#update-estimate-btn").addClass(btnColor);
+            $("#updateEstimateMessage").text("Are you sure you want to "+estimateType+" this Estimate ?");
+        });
+
+        $(document).on('click', '#update-estimate-btn', function () {
+            const estimateId = $("#txtestimateid").val(),
+                    estimateType = $("#txtestimatetype").val(),
+                    thisObj = $(this);
+            $.ajax({
+                url: baseUrl + '/my-estimate/update-estimate-status',
+                type: 'POST',
+                data: {
+                    _token: csrfToken,
+                    estimateId: estimateId,
+                    estimateType: estimateType
+                },
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                beforeSend: function(jqXHR, settings) {
+                    thisObj.prop('disabled', true).text('Waiting...');
+                },
+                success: function (res) {
+                    toastr.success(res.message);
+                    thisObj.prop('disabled', false).text('Yes, '+estimateType+' It!');
+                    $('#updateEstimateStatusModal').offcanvas('hide');
+                    $('#userEstimateTable').DataTable().ajax.reload(null, false);
+                },
+                error: function(xhr, error, thrown) {
+                    thisObj.prop('disabled', true).text('Yes, '+estimateType+' It!');
+                    if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                        toastr.error('Session expired due to inactivity. Redirecting to login...');
+                        window.location.href = baseUrl + '/login';
+                    } else if (xhr.status === 401) {
+                        toastr.error('Unauthorized access. Redirecting to login...');
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("AJAX error:", xhr.responseText);
+                        toastr.error("AJAX error:", xhr.responseText);
+                    }
+                }
+            });
+        });
+
+    // End
+
+    // Client Repair Order
+        let dataClientRepairOrderRoute = $('#userRepairOrderTable').data('route');
+        if ($('#userRepairOrderTable').length) 
+        {
+            $('#userRepairOrderTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url:dataClientRepairOrderRoute,
+                    type: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                    },
+                    error: function(xhr, error, thrown) {
+                        if (xhr.status === 401) {
+                            alert("Session expired. Redirecting to login...");
+                            window.location.href = baseUrl + '/login';
+                        } else {
+                            console.error("DataTable load error:", xhr.responseText);
+                        }
+                    }
+                },
+                stateSave: true,
+                columns: [
+                    { data: 'repairorder_estimate_id', name: 'repairorder_estimate_id' },
+                    { data: 'repairorder_order_no', name: 'repairorder_order_no' },
+                    { data: 'repairorder_garage_employee', name: 'repairorder_garage_employee' },
+                    { data: 'garage_owner_name', name: 'garage_owner_name' },
+                    { data: 'vehicle', name: 'vehicle' },
+                    { data: 'number_plate', name: 'number_plate' },
+                    { data: 'vin', name: 'vin' },
+                    { data: 'repairorder_amount', name: 'repairorder_amount' },
+                    { data: 'repairorder_order_date', name: 'repairorder_order_date' },
+                    { data: 'repaiorder_clock_in', name: 'repaiorder_clock_in' },
+                    { data: 'repaiorder_clock_out', name: 'repaiorder_clock_out' },
+                    { data: 'repairorder_status', name: 'repairorder_status' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                order: [[0, 'asc']], // Default sorting by ID
+                lengthMenu: [10, 25, 50, 100], // Records per page options
+                pageLength: 10, // Default records per page
+            });
+        }
+
+        $(document).on('click', '.updateRepairOrderStatusModal', function () {
+            const repairorderId = $(this).data('repairorder-id'),
+                    repairorderType = $(this).data('repairorder-type'),
+                    btnColor = $(this).data('btncolor');
+            $("#txtrepairorderid").val(repairorderId);
+            $("#txtrepairordertype").val(repairorderType);
+            $("#update-repair-order-btn").text("Yes, "+repairorderType+" It!");
+            $("#update-repair-order-btn").attr("class", "");
+            $("#update-repair-order-btn").addClass(btnColor);
+            $("#updateRepairOrderMessage").text("Are you sure you want to "+repairorderType+" this Repair Order ?");
+        });
+
+        $(document).on('click', '#update-repair-order-btn', function () {
+            const repairorderId = $("#txtrepairorderid").val(),
+                    repairorderType = $("#txtrepairordertype").val(),
+                    thisObj = $(this);
+            $.ajax({
+                url: baseUrl + '/my-repair-order/update-repair-order-status',
+                type: 'POST',
+                data: {
+                    _token: csrfToken,
+                    repairorderId: repairorderId,
+                    repairorderType: repairorderType
+                },
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                beforeSend: function(jqXHR, settings) {
+                    thisObj.prop('disabled', true).text('Waiting...');
+                },
+                success: function (res) {
+                    toastr.success(res.message);
+                    thisObj.prop('disabled', false).text('Yes, '+repairorderType+' It!');
+                    $('#updateRepairOrderStatusModal').offcanvas('hide');
+                    $('#userRepairOrderTable').DataTable().ajax.reload(null, false);
+                },
+                error: function(xhr, error, thrown) {
+                    thisObj.prop('disabled', true).text('Yes, '+repairorderType+' It!');
+                    if (xhr.status === 419 || xhr.responseText.includes('CSRF token mismatch')) {
+                        toastr.error('Session expired due to inactivity. Redirecting to login...');
+                        window.location.href = baseUrl + '/login';
+                    } else if (xhr.status === 401) {
+                        toastr.error('Unauthorized access. Redirecting to login...');
+                        window.location.href = baseUrl + '/login';
+                    } else {
+                        console.error("AJAX error:", xhr.responseText);
+                        toastr.error("AJAX error:", xhr.responseText);
+                    }
+                }
+            });
+        });
+    // End
+
+    // Client Invoice
+
+        let dataClientInvoiceRoute = $('#userInvoiceTable').data('route');
+        if ($('#userInvoiceTable').length) 
+        {
+            $('#userInvoiceTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url:dataClientInvoiceRoute,
+                    type: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken  // Add CSRF token in headers
+                    },
+                    error: function(xhr, error, thrown) {
+                        if (xhr.status === 401) {
+                            alert("Session expired. Redirecting to login...");
+                            window.location.href = baseUrl + '/login';
+                        } else {
+                            console.error("DataTable load error:", xhr.responseText);
+                        }
+                    }
+                },
+                stateSave: true,
+                columns: [
+                    { data: 'invoice_id', name: 'invoice_id' },
+                    { data: 'invoice_booking_id', name: 'invoice_booking_id' },
+                    { data: 'invoice_no', name: 'invoice_no' },
+                    { data: 'garage_owner_name', name: 'garage_owner_name' },
+                    { data: 'vehicle', name: 'vehicle' },
+                    { data: 'number_plate', name: 'number_plate' },
+                    { data: 'vin', name: 'vin' },
+                    { data: 'invoice_total_inctax', name: 'invoice_total_inctax' },
+                    { data: 'invoice_total', name: 'invoice_total' },
+                    { data: 'invoice_date', name: 'invoice_date' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                order: [[0, 'asc']], // Default sorting by ID
+                lengthMenu: [10, 25, 50, 100], // Records per page options
+                pageLength: 10, // Default records per page
+            });
+        }
+
+    // End
+
+    // CLient Profile Image and Backgorund Image Update
+
+        // Foreground Image
+        $("#client-profile-foreground-img-file-input").on("change", function () {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    $(".profile-wid-img").attr("src", e.target.result); // instant preview
+                };
+                reader.readAsDataURL(file);
+
+                uploadImage(file, "Cover");
+            }
+        });
+
+        // Profile Image
+        $("#client-profile-img-file-input").on("change", function () {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    $(".user-profile-image").attr("src", e.target.result); // instant preview
+                };
+                reader.readAsDataURL(file);
+
+                uploadImage(file, "Profile");
+            }
+        });
+
+        function uploadImage(file, type) {
+            let formData = new FormData();
+            formData.append("image", file);
+            formData.append("type", type);
+            formData.append("_token", csrfToken); // csrfToken should be defined in Blade
+
+            $.ajax({
+                url: baseUrl + "/my-profile/update-profile-image", // baseUrl should be defined in Blade
+                type: "POST",
+                data: formData,
+                processData: false, // important for file upload
+                contentType: false, // important for file upload
+                beforeSend: function () {
+                    $(".imageloader").addClass("offcanvas-loader");
+                },
+                success: function (data) {
+                    $(".imageloader").removeClass("offcanvas-loader");
+                    if (data.status === "success") {
+                        toastr.success(data.message);
+                        setTimeout(function() {
+                            window.location.href = baseUrl + '/my-profile/view';
+                        }, 3000);
+
+                    } else {
+                        toastr.error(data.message || "Something went wrong");
+                    }
+                },
+                error: function () {
+                    toastr.error("Server error occurred");
+                }
+            });
+        }
+
+        $('#frmupdateclientprofile').parsley();
+        $('#frmupdateclientprofile').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmupdateclientprofile').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/my-profile/update',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#btnclientpupdate").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#btnclientpupdate").prop('disabled', false).text('Update');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+                            $('#frmupdateclientprofile').parsley().reset();
+                            setTimeout(function() {
+                                window.location.href = baseUrl + '/my-profile/view';
+                            }, 3000);
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#btnclientpupdate").prop('disabled', false).text('Update');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#frmupdateclientppassword').parsley();
+        $('#frmupdateclientppassword').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            if($('#frmupdateclientppassword').parsley().isValid())
+            {
+                let form = $(this);
+                $.ajax({
+                    url: baseUrl + '/my-profile/change-password',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,    // Required for file upload
+                    processData: false,    // Required for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function () {
+                        $("#txtclientpchangepassword").prop('disabled', true).text('Updating...');
+                    },
+                    success: function (res) {
+                        $("#txtclientpchangepassword").prop('disabled', false).text('Change Password');
+                        if (res.status === 'success') 
+                        {
+                            toastr.success(res.message);
+
+                            $('#frmupdateclientppassword').trigger("reset");
+                            $('#frmupdateclientppassword').parsley().reset();
+                        }
+                        else
+                        {
+                            toastr.options = {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "10000"
+                            };
+                            for (const key in res.message) 
+                            {
+                                if (res.message.hasOwnProperty(key)) 
+                                {
+                                    toastr.error(res.message[key].toString());
+                                }
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#txtclientpchangepassword").prop('disabled', false).text('Change Password');
+                        let res = xhr.responseJSON;
+
+                        if (res.status === 'error' && typeof res.message === 'object') {
+                            for (let field in res.message) {
+                                if (res.message.hasOwnProperty(field)) {
+                                    toastr.error(res.message[field][0]); // Show the first error for each field
+                                }
+                            }
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            }
+        });
+
+    // End
 
 });
