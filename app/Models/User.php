@@ -95,4 +95,11 @@ class User extends Authenticatable implements CanResetPasswordContract
             $sub->end_date >= now();
     }
 
+    public function garageUsers()
+    {
+        return $this->hasMany(User::class, 'garage_owner_id')
+                    ->where('user_type', 'User')
+                    ->whereNull('deleted_at');
+    }
+
 }

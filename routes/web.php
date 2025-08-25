@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\GoogleCalendarController;
+use App\Http\Controllers\SocialAuthController;
+
 
 use App\Http\Middleware\CheckGarageSubscription;
 
@@ -39,6 +41,14 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Public routes for Google login
 Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+
+// Google
+Route::get('auth/google', [SocialAuthController::class, 'redirectGoogle'])->name('google.login');
+Route::get('auth/google/callback', [SocialAuthController::class, 'callbackGoogle'])->name('google.callback');
+
+// Facebook
+Route::get('auth/facebook', [SocialAuthController::class, 'redirectFacebook'])->name('facebook.login');
+Route::get('auth/facebook/callback', [SocialAuthController::class, 'callbackFacebook'])->name('facebook.callback');
 
 // Protected routes (require Laravel login)
 Route::middleware('auth')->group(function () {
@@ -226,7 +236,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:User')->group(function () {
         Route::get('/user-dashboard', [DashboardController::class, 'userDashboard'])->name('dashboard.user');
 
-        // 🚀 Booking Management (Garage Owner Only)
+        // 🚀 Booking Management (User Only)
         Route::group(['prefix' => 'my-booking'], function () {
             Route::get('list', [BookingController::class, 'clientBookingList'])->name('user.booking.list');
             Route::post('data', [BookingController::class, 'getClientBookingData'])->name('user.booking.data');
@@ -235,25 +245,32 @@ Route::middleware(['auth'])->group(function () {
             Route::post('update', [BookingController::class, 'clientDataUpdate']);
         });
 
-         // 🚀 Estimate Management (Garage Owner Only)
+         // 🚀 Estimate Management (User Only)
         Route::group(['prefix' => 'my-estimate'], function () {
             Route::get('list', [EstimateController::class, 'clientEstimateLlist'])->name('user.estimate.list');
-            Route::post('data', [EstimateController::class, 'getClientEstimateData'])->name('user.estimate.data'); // DataTable route
-            Route::post('update', [EstimateController::class, 'update']);
+            Route::post('data', [EstimateController::class, 'getCLientEstimateData'])->name('user.estimate.data'); // DataTable route
+            Route::post('update-estimate-status', [EstimateController::class, 'updateEstimateStatus']);
         });
 
-        // 🚀 Repair Order Management (Garage Owner Only)
+        // 🚀 Repair Order Management (User Only)
         Route::group(['prefix' => 'my-repair-order'], function () {
-            Route::get('list', [RepairOrderController::class, 'list'])->name('user.repair-order.list');
-            Route::post('data', [RepairOrderController::class, 'getRepairOrderData'])->name('user.repair-order.data'); // DataTable route
-            Route::post('update', [RepairOrderController::class, 'update']);
+            Route::get('list', [RepairOrderController::class, 'clientRepairOrderData'])->name('user.repair-order.list');
+            Route::post('data', [RepairOrderController::class, 'getClientRepairOrderData'])->name('user.repair-order.data'); // DataTable route
+            Route::post('update-repair-order-status', [RepairOrderController::class, 'updatRepairOrderStatus']);
         });
 
-        // 🚀 Invoice Management (Garage Owner Only)
+        // 🚀 Invoice Management (User Only)
         Route::group(['prefix' => 'my-invoice'], function () {
-            Route::get('list', [InvoiceController::class, 'list'])->name('user.invoice.list');
-            Route::post('data', [InvoiceController::class, 'getInvoiceData'])->name('user.invoice.data'); // DataTable route
-            Route::post('update', [InvoiceController::class, 'update']);
+            Route::get('list', [InvoiceController::class, 'clientInvoicelist'])->name('user.invoice.list');
+            Route::post('data', [InvoiceController::class, 'getClientInvoiceData'])->name('user.invoice.data'); // DataTable route
+        });
+
+        // 🚀 Profile Management (User Only)
+        Route::group(['prefix' => 'my-profile'], function () {
+            Route::get('/view', [DashboardController::class, 'userProfile'])->name('user.profile');
+            Route::post('/update-profile-image', [DashboardController::class, 'updateUserImage'])->name('user.profile.updateImage');
+            Route::post('/update', [DashboardController::class, 'updateUserProfile'])->name('user.profile.update');
+            Route::post('/change-password', [DashboardController::class, 'updateUserPassword'])->name('user.profile.change-password');
         });
     });
 });

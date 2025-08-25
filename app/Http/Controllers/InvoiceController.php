@@ -30,14 +30,16 @@ class InvoiceController extends Controller
         if (!Auth::check()) {
             abort(response()->json(['error' => 'Unauthenticated'], 401));
         }
-
-        if (Auth::user()->user_type !== 'Garage Owner') {
-            abort(response()->json(['error' => 'Unauthenticated'], 401));
-        }
     }
+
+    // For Garage Owenr data
 
     public function index($id)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -79,6 +81,10 @@ class InvoiceController extends Controller
 
     public function store(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $garage_Owner = Auth::user();
 
         //echo "<pre>"; print_r($request->all()); die;
@@ -199,6 +205,10 @@ class InvoiceController extends Controller
 
     public function list()
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -212,6 +222,10 @@ class InvoiceController extends Controller
 
     public function getInvoiceData(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
 
         $user_id = $user->id;
@@ -274,6 +288,10 @@ class InvoiceController extends Controller
 
     public function getViewInvoiceDetails(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
 
         $data = $request->all(); // Get all input data
@@ -322,6 +340,10 @@ class InvoiceController extends Controller
 
     public function edit($id)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
 
@@ -358,6 +380,10 @@ class InvoiceController extends Controller
 
     public function update(Request $request)
     {
+        if (Auth::user()->user_type !== 'Garage Owner') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
         $garage_Owner = Auth::user();
 
         //echo "<pre>"; print_r($request->all()); die;
@@ -485,4 +511,95 @@ class InvoiceController extends Controller
             ], 500);
         }
     }
+
+    // End
+
+    // For User data
+
+    public function clientInvoicelist()
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $invoice_data = InvoiceModel::whereNull('tbl_invoices.deleted_at')
+                                                ->get();
+        
+        $setting_data = SettingModel::where("setting_garage_id", $user_id)->whereNull('deleted_at')->first();
+
+        return view('user.invoice.list', compact('invoice_data', 'setting_data'));
+    }
+
+    public function getClientInvoiceData(Request $request)
+    {
+        if (Auth::user()->user_type !== 'User') {
+            abort(response()->json(['error' => 'Unauthenticated'], 401));
+        }
+
+        $user = Auth::user();
+
+        $user_id = $user->id;
+
+        $invoice = InvoiceModel::select('tbl_invoices.*', 'users.name as garage_owner_name', 'tbl_vehicles.number_plate as number_plate', 'tbl_vehicles.vin as vin', 'tbl_vehicles.modelbrand as vehicle')
+                        ->leftJoin('users', 'tbl_invoices.invoice_garage_id', '=', 'users.id')
+                        ->leftJoin('tbl_vehicles', 'tbl_invoices.invoice_vehicle_id', '=', 'tbl_vehicles.id')
+                        ->where('tbl_invoices.invoice_customer_id', $user_id)
+                        ->where('users.user_type', 'Garage Owner')
+                        ->whereNull('tbl_invoices.deleted_at')
+                        ->orderBy('tbl_invoices.invoice_id', 'desc');
+
+        return DataTables::of($invoice)
+            ->filter(function ($query) use ($request) {
+                if (!empty($request->search['value'])) {
+                    $search = $request->search['value'];
+                    $query->where(function ($q) use ($search) {
+                        $q->where('invoice_id', 'like', "%{$search}%")
+                        ->orWhere('invoice_booking_id', 'like', "%{$search}%")
+                        ->orWhere('invoice_no', 'like', "%{$search}%")
+                        ->orWhere('garage_owner_name', 'like', "%{$search}%")
+                        ->orWhere('number_plate', 'like', "%{$search}%")
+                        ->orWhere('vin', 'like', "%{$search}%")
+                        ->orWhere('vehicle', 'like', "%{$search}%")
+                        ->orWhere('invoice_total_inctax', 'like', "%{$search}%")
+                        ->orWhere('invoice_total', 'like', "%{$search}%")
+                        ->orWhere('invoice_date', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->addColumn('invoice_id', fn($invoice) => $invoice->invoice_id)
+            ->addColumn('invoice_booking_id', fn($invoice) => $invoice->invoice_booking_id)
+            ->addColumn('invoice_no', fn($invoice) => $invoice->invoice_no)
+            ->addColumn('garage_owner_name', fn($invoice) => $invoice->garage_owner_name)
+            ->addColumn('number_plate', fn($invoice) => $invoice->number_plate)
+            ->addColumn('vehicle', content: fn($invoice) => $invoice->vehicle)
+            ->addColumn('vin', content: fn($invoice) => $invoice->vin)
+            ->addColumn('invoice_total_inctax', fn($invoice) => $invoice->invoice_total_inctax)
+            ->addColumn('invoice_total', fn($invoice) => $invoice->invoice_total)
+            ->addColumn('invoice_date', fn($repair_order) => date("Y-m-d", strtotime($repair_order->invoice_date)))
+            ->addColumn('action', function ($invoice) {
+
+                if( $invoice->invoice_status == "2" )
+                {
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none disabled" title="Approved Repair Order"><i class="ri-thumb-up-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-danger btn-border btn-icon shadow-none disabled" title="Rejected Repair Order"><i class="ri-thumb-down-line"></i></a>
+                            <button type="button" class="btn btn-soft-info btn-border btn-icon shadow-none btndisplayclientinvoicedetails" title="View PDF" data-invoiceid="'.$invoice->invoice_id.'" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewInvoice" aria-controls="offcanvasRight"><i class="ri-file-pdf-2-line"></i></button>
+                            <button type="button" class="btn btn-soft-warning btn-border btn-icon shadow-none" title="Pay" data-bs-toggle="offcanvas" data-bs-target="#sidebarPayment" aria-controls="offcanvasRight"><i class="ri-secure-payment-line"></i></button>';
+                }
+                else
+                {   
+                    return '<a href="javascript:void(0);" class="btn btn-soft-success btn-border btn-icon shadow-none updateInvoiceStatusModal" data-invoice-type="Done" data-invoice-id="'.$invoice->invoice_id.'" data-btncolor="btn w-sm btn-success" title="Done Repair Order" data-bs-toggle="offcanvas" data-bs-target="#updateInvoiceStatusModal" aria-controls="offcanvasRight"><i class="ri-thumb-up-line"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-soft-danger btn-border btn-icon shadow-none updateInvoiceStatusModal" data-invoice-type="Not Done" data-invoice-id="'.$invoice->invoice_id.'" data-btncolor="btn w-sm btn-danger" title="Not Done Repair Order" data-bs-toggle="offcanvas" data-bs-target="#updateInvoiceStatusModal" aria-controls="offcanvasRight"><i class="ri-thumb-down-line"></i></a>
+                            <button type="button" class="btn btn-soft-info btn-border btn-icon shadow-none btndisplayclientinvoicedetails" title="View PDF" data-invoiceid="'.$invoice->invoice_id.'" data-bs-toggle="offcanvas" data-bs-target="#sidebarViewInvoice" aria-controls="offcanvasRight"><i class="ri-file-pdf-2-line"></i></button>
+                            <button type="button" class="btn btn-soft-warning btn-border btn-icon shadow-none" title="Pay" data-bs-toggle="offcanvas" data-bs-target="#sidebarPayment" aria-controls="offcanvasRight"><i class="ri-secure-payment-line"></i></button>';
+                }
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    // End
+
 }

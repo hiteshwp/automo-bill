@@ -16,9 +16,9 @@
                                 <div class="page-title-action-item">
                                     <button type="button" class="btn btn-primary btn-select2" data-bs-toggle="offcanvas" data-bs-target="#sidebarNewBooking" aria-controls="offcanvasRight"><i class="ri-add-large-line"></i> Add Booking</button>
                                 </div>
-                                <div class="page-title-action-item">
+                                <!-- <div class="page-title-action-item">
                                     <button type="button" class="btn btn-light" data-bs-toggle="offcanvas" data-bs-target="#sidebarExplore" aria-controls="offcanvasRight"><i class="ri-indent-decrease"></i> Explore</button>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
